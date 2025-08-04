@@ -13,9 +13,10 @@ __pycache__/
 # Arquivos de dependências de Node.js (comum em frontend)
 /frontend/node_modules/
 
-# Arquivos de configurações de ambiente
+# Arquivos de credenciais e configurações de ambiente
 .env
 .DS_Store
+backend/firebase-credentials.json
 
 # Logs de debug
 *.log

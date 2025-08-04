@@ -9,26 +9,44 @@ from fastapi import FastAPI, HTTPException, Form, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, firestore
 from google.cloud.firestore import Client
+import json # Adicione esta importação
 
 # ==============================================================================
 # Configuração do Firebase
 # ==============================================================================
 # Tenta inicializar o app do Firebase se ainda não foi inicializado
-cred_path = "firebase-credentials.json"
-if os.path.exists(cred_path):
+
+# Prioriza variável de ambiente para credenciais em produção
+firebase_credentials_env = os.getenv("FIREBASE_CREDENTIALS_JSON")
+
+if firebase_credentials_env:
     try:
-        # A forma correta de verificar se o app já foi inicializado
+        # Carrega o JSON da variável de ambiente
+        cred_dict = json.loads(firebase_credentials_env)
         if not firebase_admin._apps:
-            cred = credentials.Certificate(cred_path)
+            cred = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred)
-        print("✅ Firebase inicializado com sucesso!")
+        print("✅ Firebase inicializado com sucesso via variável de ambiente!")
         db = firestore.client()
     except Exception as e:
-        print(f"❌ Erro ao inicializar o Firebase: {e}")
+        print(f"❌ Erro ao inicializar o Firebase via variável de ambiente: {e}")
         db: Optional[Client] = None
 else:
-    print(f"❌ Arquivo de credenciais não encontrado: {cred_path}")
-    db: Optional[Client] = None
+    # Fallback para arquivo local em desenvolvimento (se existir)
+    cred_path = "firebase-credentials.json"
+    if os.path.exists(cred_path):
+        try:
+            if not firebase_admin._apps:
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred)
+            print("✅ Firebase inicializado com sucesso via arquivo local!")
+            db = firestore.client()
+        except Exception as e:
+            print(f"❌ Arquivo de credenciais não encontrado: {cred_path} e variável de ambiente não definida.")
+            db: Optional[Client] = None
+    else:
+        print(f"❌ Arquivo de credenciais não encontrado: {cred_path} e variável de ambiente não definida.")
+        db: Optional[Client] = None # Garante que db é None se as credenciais não forem carregadas
 
 # ==============================================================================
 # Configuração do FastAPI

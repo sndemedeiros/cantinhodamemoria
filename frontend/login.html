@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantinho da Memória - Acesso</title>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #fcfaf5;
+            /* Fundo creme muito suave */
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: #fefcf5;
+            /* Card com fundo creme suave */
+            padding: 40px 50px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .app-header {
+            margin-bottom: 35px;
+        }
+
+        .app-header img {
+            width: 110px;
+            margin-bottom: 12px;
+        }
+
+        .app-header h1 {
+            color: #5d996c;
+            /* Verde mais suave e natural */
+            margin: 0;
+            font-size: 2.8em;
+            font-weight: bold;
+            letter-spacing: -1px;
+        }
+
+        .app-header p {
+            color: #777;
+            margin: 8px 0 0;
+            font-size: 1.1em;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 40px 0;
+        }
+
+        .form-container h2 {
+            color: #555;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #5d996c;
+            box-shadow: 0 0 0 3px rgba(93, 153, 108, 0.2);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: #5d996c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #528a61;
+            transform: translateY(-2px);
+        }
+
+        a {
+            color: #5d996c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos da caixa de feedback para a página de login */
+        #message-box {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        #message-box.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        #message-box.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        /* Animações */
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .slide-out {
+            animation: slideOut 0.5s ease-in forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Estilos do modal de privacidade */
+        .privacy-link {
+            display: block;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .privacy-link a {
+            font-weight: normal;
+            color: #5d996c;
+            text-decoration: underline;
+        }
+
+        .privacy-link a:hover {
+            text-decoration: none;
+        }
+
+        .modal-overlay {
+            display: none;
+            /* Inicia oculto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #fefcf5;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 90%;
+            width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: left;
+        }
+
+        .modal-content h2 {
+            font-size: 2em;
+            color: #5d996c;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .modal-content p,
+        .modal-content li {
+            color: #444;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .modal-content ul {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="app-header">
+            <!-- Caminho da imagem original, com fallback para placeholder se falhar -->
+            <img id="app-logo" src="logo_suzika.png" alt="Logo do Cantinho da Memória"
+                onerror="this.src='https://placehold.co/110x110/5d996c/ffffff?text=Logo'">
+            <h1>Cantinho da Memória</h1>
+            <p>Seu espaço para lembranças e compromissos.</p>
+        </div>
+
+        <div id="form-content">
+            <!-- Formulário de Login -->
+            <div id="login-form-section" class="form-section slide-in">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-code">Código de Acesso (4 dígitos)</label>
+                        <input type="text" id="login-code" name="code" maxlength="4" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-question-id">Pergunta de Segurança</label>
+                        <select id="login-question-id" name="question_id" required>
+                            <option value="" disabled selected>Selecione uma pergunta</option>
+                            <option value="1">Qual era o nome do seu primeiro animal de estimação?</option>
+                            <option value="2">Qual o nome da sua rua de infância?</p>
+                            <option value="3">Qual é o seu livro favorito?</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-answer">Resposta da Pergunta de Segurança</label>
+                        <input type="text" id="login-answer" name="answer" required>
+                    </div>
+
+                    <button type="submit">Entrar</button>
+                </form>
+                <a id="toggle-to-register" class="toggle-link">Não tem uma conta? Crie uma aqui.</a>
+            </div>
+
+            <!-- Formulário de Registro -->
+            <div id="register-form-section" class="form-section" style="display:none;">
+                <h2>Criar Conta</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-code">Código de Acesso (4 dígitos)</label>
+                        <input type="text" id="register-code" name="code" maxlength="4" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-question-id">Pergunta de Segurança</label>
+                        <select id="register-question-id" name="question_id" required>
+                            <option value="" disabled selected>Selecione uma pergunta</option>
+                            <option value="1">Qual era o nome do seu primeiro animal de estimação?</option>
+                            <option value="2">Qual o nome da sua rua de infância?</p>
+                            <option value="3">Qual é o seu livro favorito?</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-answer">Resposta da Pergunta de Segurança</label>
+                        <input type="text" id="register-answer" name="answer" required>
+                    </div>
+
+                    <button type="submit">Criar Conta</button>
+                </form>
+                <a id="toggle-to-login" class="toggle-link">Já tem uma conta? Voltar para o login.</a>
+            </div>
+        </div>
+
+        <!-- Link para a Política de Privacidade -->
+        <div class="privacy-link">
+            <a href="#" id="privacy-link">Política de Privacidade</a>
+        </div>
+
+        <div id="message-box"></div>
+    </div>
+
+    <!-- Modal de Aviso de Privacidade (inicialmente oculto) -->
+    <div id="privacy-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-modal-btn" class="close-btn">&times;</button>
+            <h2>Política de Privacidade</h2>
+            <p>
+                Agradecemos por usar o Cantinho da Memória! Para garantir a segurança e a funcionalidade,
+                é importante que você saiba como tratamos seus dados.
+            </p>
+            <ul>
+                <li><strong>Dados de Cadastro:</strong> Suas informações de login são armazenadas de forma segura e
+                    criptografada no **Firebase**.</li>
+                <li><strong>Conteúdo do Usuário:</strong> Fotos e arquivos são armazenados com segurança no
+                    **Cloudinary**. No entanto, para fins de segurança e para garantir o bom funcionamento do serviço, o
+                    administrador do aplicativo terá acesso para visualização e moderação desse conteúdo.</li>
+                <li><strong>Compromisso:</strong> Nosso objetivo é a transparência. O acesso aos seus arquivos será
+                    realizado apenas quando estritamente necessário.</li>
+            </ul>
+            <p>
+                Ao continuar, você confirma que leu e concorda com esta política.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleToRegisterLink = document.getElementById('toggle-to-register');
+        const toggleToLoginLink = document.getElementById('toggle-to-login');
+        const loginSection = document.getElementById('login-form-section');
+        const registerSection = document.getElementById('register-form-section');
+        const messageBox = document.getElementById('message-box');
+
+        // NOVOS ELEMENTOS: Para a política de privacidade
+        const privacyLink = document.getElementById('privacy-link');
+        const privacyModal = document.getElementById('privacy-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = isError ? 'error' : 'success';
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Alterna entre os formulários de login e registro
+        function toggleForms() {
+            if (loginSection.style.display === 'none') {
+                loginSection.style.display = 'block';
+                registerSection.style.display = 'none';
+                loginSection.classList.remove('slide-out');
+                loginSection.classList.add('slide-in');
+            } else {
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'block';
+                registerSection.classList.remove('slide-out');
+                registerSection.classList.add('slide-in');
+            }
+        }
+
+        toggleToRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleForms();
+        });
+
+        toggleToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleForms();
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const code = document.getElementById('register-code').value;
+            const question_id = document.getElementById('register-question-id').value;
+            const answer = document.getElementById('register-answer').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, question_id, answer })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(data.message);
+                    registerForm.reset();
+                    toggleForms(); // Volta para o login após o registro bem-sucedido
+                } else {
+                    const errorData = await response.json();
+                    showMessage(errorData.detail, true);
+                }
+            } catch (error) {
+                console.error('Erro ao registrar:', error);
+                showMessage('Falha na conexão com o servidor.', true);
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const code = document.getElementById('login-code').value;
+            const question_id = document.getElementById('login-question-id').value;
+            const answer = document.getElementById('login-answer').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, question_id, answer })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(data.message);
+                    localStorage.setItem('user_id', data.user_id);
+                    // Redireciona para a página de lembretes
+                    window.location.href = 'lembretes.html';
+                } else {
+                    const errorData = await response.json();
+                    showMessage(errorData.detail, true);
+                }
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                showMessage('Falha na conexão com o servidor.', true);
+            }
+        });
+
+        // Lógica para mostrar e esconder o modal de privacidade
+        privacyLink.addEventListener('click', (event) => {
+            event.preventDefault(); // Impede o link de navegar
+            privacyModal.style.display = 'flex';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            privacyModal.style.display = 'none';
+        });
+
+        privacyModal.addEventListener('click', (event) => {
+            if (event.target === privacyModal) {
+                privacyModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

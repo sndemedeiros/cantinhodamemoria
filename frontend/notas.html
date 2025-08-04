@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Notas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="welcome-message">Olá, Usuário</span>
+        </div>
+        <nav>
+            <a href="lembretes.html">Lembretes</a>
+            <a href="notas.html" class="active">Notas</a>
+            <a href="memorias.html">Memórias</a>
+            <a href="rotinas.html">Rotinas</a>
+            <a href="medicamentos.html">Medicamentos</a>
+            <a href="#" id="logout-btn">Sair</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Minhas Notas</h1>
+        <div id="message-box" class="message-box" style="display: none;"></div>
+        <section class="add-item-form">
+            <h2>Adicionar Nova Nota</h2>
+            <form id="note-form">
+                <div class="form-group">
+                    <label for="title-input">Título:</label>
+                    <input type="text" id="title-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="content-textarea">Conteúdo:</label>
+                    <textarea id="content-textarea" required></textarea>
+                </div>
+                <button type="submit">Adicionar Nota</button>
+            </form>
+        </section>
+
+        <section class="list-container">
+            <h2>Lista de Notas</h2>
+            <ul id="notes-list" class="item-list">
+            </ul>
+        </section>
+    </main>
+
+    <script src="notas.js"></script>
+    <script>
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            document.getElementById('welcome-message').textContent = `Olá, ${userId}`;
+        }
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user_id');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fcfaf5;
+    /* Fundo creme muito suave */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    background-color: #fefcf5;
+    /* Card com fundo creme suave */
+    padding: 40px 50px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.app-header {
+    margin-bottom: 35px;
+}
+
+.app-header img {
+    width: 110px;
+    margin-bottom: 12px;
+}
+
+.app-header h1 {
+    color: #5d996c;
+    /* Verde mais suave e natural */
+    margin: 0;
+    font-size: 2.8em;
+    font-weight: bold;
+    letter-spacing: -1px;
+}
+
+.app-header p {
+    color: #777;
+    margin: 8px 0 0;
+    font-size: 1.1em;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 40px 0;
+}
+
+.form-container h2 {
+    color: #555;
+    font-size: 1.8em;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    font-size: 1em;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #5d996c;
+    box-shadow: 0 0 0 3px rgba(93, 153, 108, 0.2);
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #5d996c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #528a61;
+    transform: translateY(-2px);
+}
+
+p {
+    color: #888;
+    line-height: 1.6;
+}
+
+a {
+    color: #5d996c;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos da caixa de feedback para a página de login */
+#message-box {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    display: none;
+    text-align: center;
+    font-size: 1em;
+}
+
+#message-box.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+#message-box.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}

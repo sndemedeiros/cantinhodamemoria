@@ -1,0 +1,21 @@
+# Ambiente virtual do Python
+/venv/
+
+# Arquivos de cache e de compilação
+__pycache__/
+*.pyc
+*.pyo
+*~
+
+# Arquivos de histórico do editor de código (VS Code, etc.)
+.history/
+
+# Arquivos de dependências de Node.js (comum em frontend)
+/frontend/node_modules/
+
+# Arquivos de configurações de ambiente
+.env
+.DS_Store
+
+# Logs de debug
+*.log

@@ -2,9 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================================================
     // Conexão com o Backend (API)
     // ==============================================================================
-    // ATENÇÃO: Substitua 'SUA_URL_DO_BACKEND_AQUI' pela URL real do seu serviço backend no Render.
-    // Exemplo: const BASE_URL = 'https://cantinho-da-memoria-backend.onrender.com';
-    const BASE_URL = 'SUA_URL_DO_BACKEND_AQUI'; // <--- COLOQUE A URL DO SEU BACKEND AQUI!
+    // A URL real do seu serviço backend no Render.
+    const BASE_URL = 'https://cantinho-da-memoria-backend.onrender.com';
 
     // Função auxiliar para fazer requisições à API
     async function apiRequest(endpoint, method = 'GET', data = null) {

@@ -1,7 +1,15 @@
 {
     "builds": [
         {
-            "src": "frontend/index.html",
+            "src": "frontend/**/*.html",
+            "use": "@vercel/static-build"
+        },
+        {
+            "src": "frontend/**/*.js",
+            "use": "@vercel/static-build"
+        },
+        {
+            "src": "frontend/**/*.css",
             "use": "@vercel/static-build"
         }
     ],

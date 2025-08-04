@@ -63,6 +63,13 @@ app.add_middleware(
 )
 
 # ==============================================================================
+# NOVO ENDPOINT: Rota Raiz para verificar se o backend está ativo
+# ==============================================================================
+@app.get("/")
+async def read_root():
+    return {"message": "Bem-vindo ao Cantinho da Memória API!"}
+
+# ==============================================================================
 # Modelos de Dados (Pydantic)
 # ==============================================================================
 class User(BaseModel):

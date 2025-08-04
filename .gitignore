@@ -20,3 +20,15 @@ backend/firebase-credentials.json
 
 # Logs de debug
 *.log
+
+# Pasta de configurações ocultas do VS Code
+.vscode/
+
+# Banco de dados SQLite (caso use algum localmente)
+*.sqlite3
+*.db
+
+# Arquivos temporários do sistema operacional
+Thumbs.db
+ehthumbs.db
+*.swp

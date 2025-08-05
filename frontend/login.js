@@ -2,8 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==============================================================================
     // Conexão com o Backend (API)
     // ==============================================================================
-    // A URL real do seu serviço backend no Render.
-    const BASE_URL = 'https://cantinho-da-memoria-backend.onrender.com';
+    // Define a URL base da API, adaptando-se entre ambiente local e de produção no Render.
+    const BASE_URL = window.location.hostname === 'localhost'
+        ? 'http://127.0.0.1:8000'
+        : 'https://cantinho-da-memoria-backend.onrender.com';
 
     // Função auxiliar para fazer requisições à API
     async function apiRequest(endpoint, method = 'GET', data = null) {

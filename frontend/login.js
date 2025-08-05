@@ -13,27 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleToLoginLink = document.getElementById('toggle-to-login');
     const loginSection = document.getElementById('login-form-section');
     const registerSection = document.getElementById('register-form-section');
+    // messageBox não precisa ser definida aqui, pois showMessage a encontra globalmente ou é passada como argumento
 
-    // Elementos para a política de privacidade
+    // NOVOS ELEMENTOS: Para a política de privacidade
     const privacyLink = document.getElementById('privacy-link');
     const privacyModal = document.getElementById('privacy-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
     // Alterna entre os formulários de login e registro
     function toggleForms() {
-        console.log('toggleForms: Iniciando alternância de formulários.');
         if (loginSection.classList.contains('active')) {
             loginSection.classList.remove('active');
             loginSection.classList.add('hidden');
             registerSection.classList.remove('hidden');
             registerSection.classList.add('active');
-            console.log('toggleForms: Alternou para o formulário de Registro.');
         } else {
             registerSection.classList.remove('active');
             registerSection.classList.add('hidden');
             loginSection.classList.remove('hidden'); // Certifica-se de que não está hidden
             loginSection.classList.add('active');
-            console.log('toggleForms: Alternou para o formulário de Login.');
         }
     }
 
@@ -66,12 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await apiRequest('register', 'POST', { code, question_id, answer });
                 showMessage(response.message, false);
-                registerForm.reset(); // Limpa o formulário
+                registerForm.reset(); // Esta linha limpa o formulário
                 toggleForms(); // Volta para o login após o registro bem-sucedido
             } catch (error) {
-                // Agora exibe a mensagem de erro específica vinda do backend
+                // showMessage já foi chamado dentro de apiRequest
                 console.error('Erro ao registrar no formulário:', error);
-                showMessage(error.message, true); // Usa error.message para a mensagem específica
             }
         });
     }
@@ -88,11 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await apiRequest('login', 'POST', { code, question_id, answer });
                 showMessage(response.message, false);
                 localStorage.setItem('user_id', response.user_id);
-                window.location.href = 'lembretes.html'; // Redireciona para a página de lembretes
+                window.location.href = 'lembretes.html';
             } catch (error) {
-                // Agora exibe a mensagem de erro específica vinda do backend
+                // showMessage já foi chamado dentro de apiRequest
                 console.error('Erro ao fazer login no formulário:', error);
-                showMessage(error.message, true); // Usa error.message para a mensagem específica
             }
         });
     }

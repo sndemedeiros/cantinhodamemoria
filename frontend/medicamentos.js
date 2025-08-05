@@ -1,135 +1,109 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // A URL base da nossa API do FastAPI
-    const API_URL = 'http://127.0.0.1:8000';
+// medicamentos.js - Lógica específica para a página de medicamentos
 
-    // Obter o ID do usuário do localStorage
-    const currentUserId = localStorage.getItem('user_id');
+// Importa as funções apiRequest e showMessage do arquivo api.js
+import { apiRequest, showMessage } from './api.js';
 
-    // Elementos HTML
-    const form = document.getElementById('medication-form');
-    const nameInput = document.getElementById('name-input');
-    const dosageInput = document.getElementById('dosage-input');
-    const timeInput = document.getElementById('time-input');
-    const medicationsList = document.getElementById('medications-list');
-    const messageBox = document.getElementById('message-box');
+document.addEventListener('DOMContentLoaded', async () => {
+    const welcomeMessage = document.getElementById('welcome-message');
+    const logoutButton = document.getElementById('logout-btn');
+    const medicationForm = document.getElementById('medication-form'); // ID do formulário de medicamentos
+    const medicationsList = document.getElementById('medications-list'); // ID da sua lista de medicamentos
 
-    // Verificar se o usuário está logado, caso contrário redireciona
-    if (!currentUserId) {
-        window.location.href = 'login.html';
-        return;
-    }
+    const userId = localStorage.getItem('user_id');
 
-    /**
-     * Exibe uma mensagem de feedback na tela.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {boolean} isError - Indica se é uma mensagem de erro.
-     */
-    function showMessage(message, isError = false) {
-        messageBox.textContent = message;
-        messageBox.className = isError ? 'message-box error' : 'message-box success';
-        messageBox.style.display = 'block';
+    // Redireciona se o usuário não estiver logado
+    if (!userId) {
+        showMessage('Você precisa estar logado para acessar esta página.', true);
+        // Pequeno atraso para a mensagem aparecer antes de redirecionar
         setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 5000); // Esconde a mensagem depois de 5 segundos
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        }, 1500);
+        return; // Interrompe a execução do script
     }
 
-    // Função para buscar e exibir os medicamentos da API
-    async function fetchAndDisplayMedications() {
-        try {
-            const response = await fetch(`${API_URL}/medicamentos/${currentUserId}`);
-            const medications = await response.json();
+    // Atualiza a mensagem de boas-vindas
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Olá, ${userId}`;
+    }
 
-            medicationsList.innerHTML = ''; // Limpa a lista antes de adicionar
+    // Lógica para Logout
+    if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user_id'); // Remove o user_id do localStorage
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        });
+    }
+
+    // Função para carregar e exibir medicamentos
+    async function loadMedications() {
+        if (!userId) return; // Garante que há um userId antes de tentar carregar
+
+        try {
+            // Exibe "Carregando medicamentos..." enquanto a requisição é feita
+            medicationsList.innerHTML = '<p>Carregando medicamentos...</p>';
+
+            // Usa a função apiRequest importada
+            const medications = await apiRequest(`medicamentos/${userId}`);
+            medicationsList.innerHTML = ''; // Limpa a mensagem de carregamento
+
             if (medications.length === 0) {
-                medicationsList.innerHTML = '<p>Nenhum medicamento cadastrado.</p>';
+                medicationsList.innerHTML = '<p>Nenhum medicamento encontrado. Crie um novo!</p>';
             } else {
                 medications.forEach(medication => {
-                    const medicationCard = document.createElement('li');
-                    medicationCard.className = 'medication-card';
-                    medicationCard.innerHTML = `
-                        <div class="medication-info">
+                    const li = document.createElement('li');
+                    li.className = 'medication-card'; // Mantém a classe para o seu CSS
+                    li.innerHTML = `
+                        <div class="item-info">
                             <p class="title">${medication.nome}</p>
                             <p>${medication.dosagem} às ${medication.horario}</p>
                         </div>
-                        <button class="delete-btn" data-id="${medication.id}">❌</button>
+                        <button class="delete-btn" data-id="${medication.id}"><i class="fas fa-trash-alt"></i></button>
                     `;
-                    medicationsList.appendChild(medicationCard);
+                    medicationsList.appendChild(li);
                 });
-                // Adicionar event listeners aos botões de deletar
+
+                // Adiciona event listeners para os botões de exclusão
                 document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', deleteMedication);
+                    button.onclick = async (event) => {
+                        const medicationId = event.currentTarget.dataset.id; // Usar currentTarget
+                        try {
+                            await apiRequest(`medicamentos/${medicationId}`, 'DELETE');
+                            showMessage('Medicamento excluído com sucesso!', false);
+                            loadMedications(); // Recarrega a lista
+                        } catch (error) {
+                            console.error('Erro ao excluir medicamento:', error);
+                            showMessage('Erro ao excluir medicamento.', true);
+                        }
+                    };
                 });
             }
         } catch (error) {
-            console.error('Erro ao buscar medicamentos:', error);
+            console.error('Erro ao carregar medicamentos:', error);
             showMessage('Erro ao carregar medicamentos.', true);
         }
     }
 
-    // Função para adicionar um novo medicamento
-    async function createMedication(event) {
-        event.preventDefault();
+    // Lógica para adicionar novo medicamento
+    if (medicationForm) {
+        medicationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('name-input').value;
+            const dosagem = document.getElementById('dosage-input').value;
+            const horario = document.getElementById('time-input').value;
 
-        const nome = nameInput.value;
-        const dosagem = dosageInput.value;
-        const horario = timeInput.value;
-
-        const medicationData = {
-            user_id: currentUserId,
-            nome: nome,
-            dosagem: dosagem,
-            horario: horario
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/medicamentos`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(medicationData)
-            });
-
-            if (response.ok) {
-                showMessage('Medicamento adicionado com sucesso!');
-                form.reset();
-                fetchAndDisplayMedications();
-            } else {
+            try {
+                await apiRequest('medicamentos', 'POST', { user_id: userId, nome, dosagem, horario });
+                showMessage('Medicamento adicionado com sucesso!', false);
+                medicationForm.reset();
+                loadMedications(); // Recarrega a lista de medicamentos
+            } catch (error) {
+                console.error('Erro ao adicionar medicamento:', error);
                 showMessage('Erro ao adicionar medicamento.', true);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar medicamento:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
+        });
     }
 
-    // Função para deletar um medicamento
-    async function deleteMedication(event) {
-        const medicationId = event.target.dataset.id;
-        try {
-            const response = await fetch(`${API_URL}/medicamentos/${medicationId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                showMessage('Medicamento excluído com sucesso!');
-                fetchAndDisplayMedications();
-            } else {
-                showMessage('Erro ao excluir medicamento.', true);
-            }
-        } catch (error) {
-            console.error('Erro ao excluir medicamento:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
-    }
-
-    // Event Listeners
-    if (form) {
-        form.addEventListener('submit', createMedication);
-    }
-
-    // Inicializar a lista de medicamentos quando a página carrega
-    window.addEventListener('load', () => {
-        fetchAndDisplayMedications();
-    });
+    // Carrega os medicamentos ao carregar a página (após todas as definições)
+    loadMedications();
 });

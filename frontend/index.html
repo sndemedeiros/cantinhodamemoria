@@ -225,13 +225,20 @@
                     const response = await fetch(url, options);
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(errorData.detail || 'Erro na requisição da API');
+                        // Lança a mensagem de erro específica do backend ou um erro genérico
+                        throw new Error(errorData.detail || 'Erro desconhecido na requisição da API');
                     }
                     return await response.json();
                 } catch (error) {
                     console.error('Erro na requisição da API:', error);
-                    showMessage('Falha na conexão com o servidor.', true); // Adicionado showMessage para erros de rede
-                    throw error;
+                    // Exibe uma mensagem genérica de falha de conexão para erros de rede
+                    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                        showMessage('Falha na conexão com o servidor. Verifique sua internet ou tente novamente.', true);
+                    } else {
+                        // Para erros que vêm do backend (ex: "Código de acesso já em uso"), exibe a mensagem detalhada
+                        showMessage(error.message || 'Ocorreu um erro inesperado.', true);
+                    }
+                    throw error; // Re-lança o erro para ser capturado pelos manipuladores de formulário
                 }
             }
 
@@ -292,6 +299,7 @@
             }
 
             if (toggleToLoginLink) {
+                // Correção: Adicionado o event listener corretamente
                 toggleToLoginLink.addEventListener('click', (e) => {
                     e.preventDefault();
                     toggleForms();
@@ -307,22 +315,14 @@
                     const answer = document.getElementById('register-answer').value;
 
                     try {
-                        // Usando a função apiRequest para registro
                         const response = await apiRequest('register', 'POST', { code, question_id, answer });
-
-                        if (response) { // apiRequest já trata erros, então se chegou aqui, foi sucesso
-                            showMessage(response.message, false);
-                            registerForm.reset();
-                            toggleForms(); // Volta para o login após o registro bem-sucedido
-                        }
+                        showMessage(response.message, false);
+                        registerForm.reset();
+                        toggleForms(); // Volta para o login após o registro bem-sucedido
                     } catch (error) {
-                        console.error('Erro ao registrar:', error);
-                        // showMessage já é chamado dentro de apiRequest para erros de rede
-                        // Para erros específicos do backend (ex: código em uso), a mensagem já vem do erroData.detail
-                        // Então, se o erro não for de rede, a mensagem já será mais específica.
-                        if (!error.message.includes('Falha na conexão com o servidor')) { // Evita duplicar mensagem de rede
-                            showMessage(error.message, true);
-                        }
+                        // showMessage já foi chamado dentro de apiRequest
+                        // Não é necessário chamar showMessage novamente aqui, a menos que seja um erro específico de formulário
+                        console.error('Erro ao registrar no formulário:', error);
                     }
                 });
             }
@@ -336,21 +336,13 @@
                     const answer = document.getElementById('login-answer').value;
 
                     try {
-                        // Usando a função apiRequest para login
                         const response = await apiRequest('login', 'POST', { code, question_id, answer });
-
-                        if (response) { // apiRequest já trata erros, então se chegou aqui, foi sucesso
-                            showMessage(response.message, false);
-                            localStorage.setItem('user_id', response.user_id);
-                            // Redireciona para a página de lembretes
-                            window.location.href = 'lembretes.html';
-                        }
+                        showMessage(response.message, false);
+                        localStorage.setItem('user_id', response.user_id);
+                        window.location.href = 'lembretes.html';
                     } catch (error) {
-                        console.error('Erro ao fazer login:', error);
-                        // showMessage já é chamado dentro de apiRequest para erros de rede
-                        if (!error.message.includes('Falha na conexão com o servidor')) { // Evita duplicar mensagem de rede
-                            showMessage(error.message, true);
-                        }
+                        // showMessage já foi chamado dentro de apiRequest
+                        console.error('Erro ao fazer login no formulário:', error);
                     }
                 });
             }
@@ -466,7 +458,8 @@
             if (logoutButton) {
                 logoutButton.addEventListener('click', () => {
                     localStorage.removeItem('user_id'); // Remove o user_id do localStorage
-                    window.location.href = 'index.html'; // Redireciona para a página de login
+                    // Redireciona para a raiz do site, que deve carregar o index.html
+                    window.location.href = window.location.origin;
                 });
             }
 

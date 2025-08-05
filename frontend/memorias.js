@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Função para redimensionar a imagem antes de enviar
+    // Função para redimensionar e comprimir a imagem antes de enviar
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -123,8 +123,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
+                    // Determine o tipo de saída para toDataURL.
+                    // Force JPEG para melhor compressão, a menos que seja PNG (que é lossless).
+                    const outputMimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                    const compressionQuality = file.type === 'image/png' ? 1.0 : quality; // Qualidade só afeta JPEG
+
                     // Converte o canvas para Base64 com qualidade especificada
-                    const resizedDataUrl = canvas.toDataURL(file.type, quality);
+                    const resizedDataUrl = canvas.toDataURL(outputMimeType, compressionQuality);
                     resolve(resizedDataUrl);
                 };
                 img.onerror = (error) => {
@@ -168,9 +173,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (imagemFile) {
                 try {
-                    // Redimensiona a imagem antes de adicionar ao FormData
-                    // MaxWidth=800px, MaxHeight=800px, Qualidade=0.7 (70%)
-                    const resizedImageBase64 = await resizeImage(imagemFile, 800, 800, 0.7);
+                    // Redimensiona e comprime a imagem
+                    // MaxWidth=800px, MaxHeight=800px, Qualidade=0.6 (60% para JPEG)
+                    const resizedImageBase64 = await resizeImage(imagemFile, 800, 800, 0.6); // Qualidade ajustada
+
                     // Converte a string Base64 de volta para um Blob para adicionar ao FormData
                     const byteString = atob(resizedImageBase64.split(',')[1]);
                     const mimeString = resizedImageBase64.split(',')[0].split(':')[1].split(';')[0];
@@ -181,10 +187,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     const resizedBlob = new Blob([ab], { type: mimeString });
 
+                    // Verifica o tamanho do Blob antes de enviar (limite do Firestore é 1MB, então ~800KB para segurança)
+                    const MAX_BLOB_SIZE_BYTES = 800 * 1024; // 800 KB
+                    if (resizedBlob.size > MAX_BLOB_SIZE_BYTES) {
+                        showMessage('A imagem, mesmo após redimensionamento, é muito grande (limite ~800KB). Tente uma imagem menor.', true);
+                        return; // Impede o envio
+                    }
+
                     formData.append('imagem', resizedBlob, imagemFile.name); // Usa o Blob redimensionado
                 } catch (error) {
-                    console.error('Erro ao redimensionar imagem:', error);
-                    showMessage('Erro ao processar a imagem. Tente uma imagem diferente.', true);
+                    console.error('Erro ao processar imagem:', error);
+                    showMessage('Erro ao processar a imagem. Tente uma imagem diferente ou menor.', true);
                     return; // Impede o envio se o redimensionamento falhar
                 }
             }

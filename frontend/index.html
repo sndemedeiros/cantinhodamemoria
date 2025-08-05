@@ -12,6 +12,68 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
+        /* Estilos para as mensagens de feedback */
+        .message-box {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .message-box.error {
+            background-color: #ef4444;
+            /* red-500 */
+            color: white;
+        }
+
+        .message-box.success {
+            background-color: #22c55e;
+            /* green-500 */
+            color: white;
+        }
+
+        /* Estilos para as transições de formulário */
+        .form-section {
+            transition: all 0.5s ease-in-out;
+            transform: translateX(0);
+            opacity: 1;
+            position: absolute;
+            /* Para sobrepor e animar */
+            width: 100%;
+            top: 0;
+            left: 0;
+            padding: 2rem;
+            /* Ajuste o padding conforme necessário */
+            box-sizing: border-box;
+        }
+
+        .form-section.hidden {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+            /* Desabilita interações quando oculto */
+        }
+
+        .form-section.active {
+            position: relative;
+            /* Volta ao fluxo normal quando ativo */
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Ajuste para o container para acomodar a posição absoluta */
+        .container {
+            min-height: 450px;
+            /* Altura mínima para evitar colapso durante a transição */
+            position: relative;
+            padding-top: 2rem;
+            /* Espaço para o logo e message box */
+            padding-bottom: 2rem;
+            /* Espaço para o link de privacidade */
+        }
     </style>
     <!-- Link para o seu arquivo CSS personalizado -->
     <link rel="stylesheet" href="login_styles.css">
@@ -40,10 +102,17 @@
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
-                    <label for="login-question-id" class="block text-sm font-medium text-gray-700 mb-1">ID da Pergunta
-                        de Segurança:</label>
-                    <input type="text" id="login-question-id" name="question_id" required
+                    <label for="login-question-id" class="block text-sm font-medium text-gray-700 mb-1">Selecione sua
+                        Pergunta de Segurança:</label>
+                    <select id="login-question-id" name="question_id" required
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">-- Selecione --</option>
+                        <option value="Cor Favorita">Qual sua cor favorita?</option>
+                        <option value="Nome do Primeiro Pet">Qual o nome do seu primeiro animal de estimação?</option>
+                        <option value="Cidade Natal">Em que cidade você nasceu?</option>
+                        <option value="Comida Favorita">Qual sua comida favorita?</option>
+                        <option value="Nome da Mãe">Qual o nome de solteira da sua mãe?</option>
+                    </select>
                 </div>
                 <div>
                     <label for="login-answer" class="block text-sm font-medium text-gray-700 mb-1">Resposta da Pergunta
@@ -72,9 +141,16 @@
                 </div>
                 <div>
                     <label for="register-question-id" class="block text-sm font-medium text-gray-700 mb-1">Escolha uma
-                        Pergunta de Segurança (ex: "Cor Favorita"):</label>
-                    <input type="text" id="register-question-id" name="question_id" required
+                        Pergunta de Segurança:</label>
+                    <select id="register-question-id" name="question_id" required
                         class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">-- Selecione --</option>
+                        <option value="Cor Favorita">Qual sua cor favorita?</option>
+                        <option value="Nome do Primeiro Pet">Qual o nome do seu primeiro animal de estimação?</option>
+                        <option value="Cidade Natal">Em que cidade você nasceu?</option>
+                        <option value="Comida Favorita">Qual sua comida favorita?</option>
+                        <option value="Nome da Mãe">Qual o nome de solteira da sua mãe?</option>
+                    </select>
                 </div>
                 <div>
                     <label for="register-answer" class="block text-sm font-medium text-gray-700 mb-1">Resposta da
@@ -97,40 +173,6 @@
             <a href="#" id="privacy-link" class="text-blue-600 hover:text-blue-800 font-medium">Política de
                 Privacidade</a>
         </p>
-    </div>
-
-    <!-- Privacy Policy Modal -->
-    <div id="privacy-modal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full relative">
-            <button id="close-modal-btn"
-                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Política de Privacidade</h3>
-            <div class="text-gray-700 text-sm max-h-96 overflow-y-auto pr-4">
-                <p class="mb-2">A sua privacidade é importante para nós. Esta política de privacidade explica como
-                    recolhemos, usamos e protegemos as suas informações pessoais.</p>
-                <h4 class="font-semibold mt-4 mb-2">Informações que Recolhemos</h4>
-                <p class="mb-2">Recolhemos informações que você nos fornece diretamente, como o seu código de acesso, ID
-                    da pergunta de segurança e resposta ao criar uma conta. Não recolhemos informações sensíveis como
-                    nomes, endereços ou dados de contacto.</p>
-                <h4 class="font-semibold mt-4 mb-2">Como Usamos as Suas Informações</h4>
-                <p class="mb-2">As informações recolhidas são usadas exclusivamente para autenticar a sua identidade e
-                    gerir o seu acesso à aplicação "Cantinho da Memória". O seu código de acesso e a resposta à pergunta
-                    de segurança são a sua chave de acesso e devem ser mantidos em sigilo.</p>
-                <h4 class="font-semibold mt-4 mb-2">Partilha de Informações</h4>
-                <p class="mb-2">Não partilhamos as suas informações pessoais com terceiros. Os seus dados são
-                    armazenados de forma segura e utilizados apenas para os fins descritos nesta política.</p>
-                <h4 class="font-semibold mt-4 mb-2">Segurança dos Dados</h4>
-                <p class="mb-2">Implementamos medidas de segurança para proteger as suas informações contra acesso não
-                    autorizado, alteração, divulgação ou destruição. No entanto, lembre-se que nenhum método de
-                    transmissão pela Internet ou método de armazenamento eletrónico é 100% seguro.</p>
-                <h4 class="font-semibold mt-4 mb-2">Alterações a Esta Política</h4>
-                <p class="mb-2">Podemos atualizar a nossa Política de Privacidade periodicamente. Iremos notificá-lo de
-                    quaisquer alterações publicando a nova Política de Privacidade nesta página.</p>
-                <p class="mt-4">Ao usar a aplicação "Cantinho da Memória", você concorda com a recolha e uso de
-                    informações de acordo com esta política.</p>
-            </div>
-        </div>
     </div>
 
     <!-- Script Block -->
@@ -325,18 +367,24 @@
                         const lembretes = await apiRequest(`lembretes/${userId}`);
                         lembretesList.innerHTML = ''; // Limpa a lista existente
                         if (lembretes.length === 0) {
-                            lembretesList.innerHTML = '<p>Nenhum lembrete encontrado. Crie um novo!</p>';
+                            lembretesList.innerHTML = '<p class="text-gray-600">Nenhum lembrete encontrado. Crie um novo!</p>';
                         } else {
                             lembretes.forEach(lembrete => {
                                 const li = document.createElement('li');
-                                li.textContent = `${lembrete.tarefa} - ${lembrete.data} às ${lembrete.hora} (${lembrete.repeticao})`;
+                                li.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-md shadow-sm';
+                                li.innerHTML = `
+                                    <span class="text-gray-800">${lembrete.tarefa} - ${lembrete.data} às ${lembrete.hora} (${lembrete.repeticao})</span>
+                                    <button class="delete-btn bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition-colors duration-200" data-id="${lembrete.id}">Excluir</button>
+                                `;
+                                lembretesList.appendChild(li);
+                            });
 
-                                const deleteBtn = document.createElement('button');
-                                deleteBtn.textContent = 'Excluir';
-                                deleteBtn.className = 'delete-btn';
-                                deleteBtn.onclick = async () => {
+                            // Adiciona event listeners para os botões de exclusão
+                            document.querySelectorAll('.delete-btn').forEach(button => {
+                                button.onclick = async (event) => {
+                                    const lembreteId = event.target.dataset.id;
                                     try {
-                                        await apiRequest(`lembretes/${lembrete.id}`, 'DELETE');
+                                        await apiRequest(`lembretes/${lembreteId}`, 'DELETE');
                                         showMessage('Lembrete excluído com sucesso!', false);
                                         loadLembretes(); // Recarrega a lista
                                     } catch (error) {
@@ -344,8 +392,6 @@
                                         showMessage('Erro ao excluir lembrete.', true);
                                     }
                                 };
-                                li.appendChild(deleteBtn);
-                                lembretesList.appendChild(li);
                             });
                         }
                     } catch (error) {
@@ -378,7 +424,7 @@
                 }
             } else if (lembretesList && !userId) {
                 // Se estiver na página de lembretes mas não houver user_id no localStorage
-                lembretesList.innerHTML = '<p>Você precisa fazer login para ver seus lembretes.</p>';
+                lembretesList.innerHTML = '<p class="text-gray-600">Você precisa fazer login para ver seus lembretes.</p>';
                 // Opcional: redirecionar para a página de login
                 // window.location.href = 'index.html';
             }
@@ -408,3 +454,6 @@
             // ... e assim por diante
         });
     </script>
+</body>
+
+</html>

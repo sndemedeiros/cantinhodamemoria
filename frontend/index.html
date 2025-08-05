@@ -1,505 +1,410 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cantinho da Memória - Acesso</title>
+    <title>Cantinho da Memória</title>
+    <!-- Carrega o Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Define a fonte Inter para todo o documento -->
     <style>
         body {
-            font-family: 'Inter', Arial, sans-serif;
-            background-color: #fcfaf5;
-            /* Fundo creme muito suave */
-            margin: 0;
-            padding: 0;
-            color: #333;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .login-container {
-            background-color: #fefcf5;
-            /* Card com fundo creme suave */
-            padding: 40px 50px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 480px;
-            text-align: center;
-            box-sizing: border-box;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .login-container:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .app-header {
-            margin-bottom: 35px;
-        }
-
-        .app-header img {
-            width: 110px;
-            margin-bottom: 12px;
-        }
-
-        .app-header h1 {
-            color: #5d996c;
-            /* Verde mais suave e natural */
-            margin: 0;
-            font-size: 2.8em;
-            font-weight: bold;
-            letter-spacing: -1px;
-        }
-
-        .app-header p {
-            color: #777;
-            margin: 8px 0 0;
-            font-size: 1.1em;
-        }
-
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 40px 0;
-        }
-
-        .form-container h2 {
-            color: #555;
-            font-size: 1.8em;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #444;
-            font-size: 1em;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 14px;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #5d996c;
-            box-shadow: 0 0 0 3px rgba(93, 153, 108, 0.2);
-        }
-
-        button[type="submit"] {
-            width: 100%;
-            padding: 15px;
-            background-color: #5d996c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #528a61;
-            transform: translateY(-2px);
-        }
-
-        a {
-            color: #5d996c;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Estilos da caixa de feedback para a página de login */
-        #message-box {
-            margin-top: 25px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            display: none;
-            text-align: center;
-            font-size: 1em;
-        }
-
-        #message-box.success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
-        }
-
-        #message-box.error {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-
-        /* Animações */
-        .slide-in {
-            animation: slideIn 0.5s ease-out forwards;
-        }
-
-        .slide-out {
-            animation: slideOut 0.5s ease-in forwards;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Estilos do modal de privacidade */
-        .privacy-link {
-            display: block;
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #777;
-        }
-
-        .privacy-link a {
-            font-weight: normal;
-            color: #5d996c;
-            text-decoration: underline;
-        }
-
-        .privacy-link a:hover {
-            text-decoration: none;
-        }
-
-        .modal-overlay {
-            display: none;
-            /* Inicia oculto */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background-color: #fefcf5;
-            padding: 40px;
-            border-radius: 16px;
-            max-width: 90%;
-            width: 600px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            text-align: left;
-        }
-
-        .modal-content h2 {
-            font-size: 2em;
-            color: #5d996c;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
-        }
-
-        .modal-content p,
-        .modal-content li {
-            color: #444;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-
-        .modal-content ul {
-            margin-top: 15px;
-            margin-bottom: 20px;
-            padding-left: 20px;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #888;
-            transition: color 0.2s ease;
-        }
-
-        .close-btn:hover {
-            color: #333;
+            font-family: 'Inter', sans-serif;
         }
     </style>
+    <!-- Link para o seu arquivo CSS personalizado -->
+    <link rel="stylesheet" href="login_styles.css">
 </head>
 
-<body>
-    <div class="login-container">
-        <div class="app-header">
-            <!-- Caminho da imagem original, com fallback para placeholder se falhar -->
-            <img id="app-logo" src="logo_suzika.png" alt="Logo do Cantinho da Memória"
-                onerror="this.src='https://placehold.co/110x110/5d996c/ffffff?text=Logo'">
-            <h1>Cantinho da Memória</h1>
-            <p>Seu espaço para lembranças e compromissos.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="container mx-auto max-w-md bg-white p-8 rounded-lg shadow-lg relative overflow-hidden">
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <img src="logo_suzika.png" alt="Logo Cantinho da Memória" class="h-24 w-auto rounded-full shadow-md">
         </div>
 
-        <div id="form-content">
-            <!-- Formulário de Login -->
-            <div id="login-form-section" class="form-section slide-in">
-                <h2>Login</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-code">Código de Acesso (4 dígitos)</label>
-                        <input type="text" id="login-code" name="code" maxlength="4" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="login-question-id">Pergunta de Segurança</label>
-                        <select id="login-question-id" name="question_id" required>
-                            <option value="" disabled selected>Selecione uma pergunta</option>
-                            <option value="1">Qual era o nome do seu primeiro animal de estimação?</option>
-                            <option value="2">Qual o nome da sua rua de infância?</p>
-                            <option value="3">Qual é o seu livro favorito?</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="login-answer">Resposta da Pergunta de Segurança</label>
-                        <input type="text" id="login-answer" name="answer" required>
-                    </div>
-
-                    <button type="submit">Entrar</button>
-                </form>
-                <a id="toggle-to-register" class="toggle-link">Não tem uma conta? Crie uma aqui.</a>
-            </div>
-
-            <!-- Formulário de Registro -->
-            <div id="register-form-section" class="form-section" style="display:none;">
-                <h2>Criar Conta</h2>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="register-code">Código de Acesso (4 dígitos)</label>
-                        <input type="text" id="register-code" name="code" maxlength="4" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="register-question-id">Pergunta de Segurança</label>
-                        <select id="register-question-id" name="question_id" required>
-                            <option value="" disabled selected>Selecione uma pergunta</option>
-                            <option value="1">Qual era o nome do seu primeiro animal de estimação?</option>
-                            <option value="2">Qual o nome da sua rua de infância?</p>
-                            <option value="3">Qual é o seu livro favorito?</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="register-answer">Resposta da Pergunta de Segurança</label>
-                        <input type="text" id="register-answer" name="answer" required>
-                    </div>
-
-                    <button type="submit">Criar Conta</button>
-                </form>
-                <a id="toggle-to-login" class="toggle-link">Já tem uma conta? Voltar para o login.</a>
-            </div>
+        <!-- Message Box -->
+        <div id="message-box"
+            class="message-box hidden mb-4 p-3 rounded-lg text-center text-white font-semibold transition-all duration-300 ease-in-out">
         </div>
 
-        <!-- Link para a Política de Privacidade -->
-        <div class="privacy-link">
-            <a href="#" id="privacy-link">Política de Privacidade</a>
-        </div>
-
-        <div id="message-box"></div>
-    </div>
-
-    <!-- Modal de Aviso de Privacidade (inicialmente oculto) -->
-    <div id="privacy-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button id="close-modal-btn" class="close-btn">&times;</button>
-            <h2>Política de Privacidade</h2>
-            <p>
-                Agradecemos por usar o Cantinho da Memória! Para garantir a segurança e a funcionalidade,
-                é importante que você saiba como tratamos seus dados.
-            </p>
-            <ul>
-                <li><strong>Dados de Cadastro:</strong> Suas informações de login são armazenadas de forma segura e
-                    criptografada no **Firebase**.</li>
-                <li><strong>Conteúdo do Usuário:</strong> Fotos e arquivos são armazenados com segurança no
-                    **Cloudinary**. No entanto, para fins de segurança e para garantir o bom funcionamento do serviço, o
-                    administrador do aplicativo terá acesso para visualização e moderação desse conteúdo.</li>
-                <li><strong>Compromisso:</strong> Nosso objetivo é a transparência. O acesso aos seus arquivos será
-                    realizado apenas quando estritamente necessário.</li>
-            </ul>
-            <p>
-                Ao continuar, você confirma que leu e concorda com esta política.
+        <!-- Login Form Section -->
+        <div id="login-form-section" class="form-section active">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-code" class="block text-sm font-medium text-gray-700 mb-1">Código de Acesso (4
+                        dígitos):</label>
+                    <input type="text" id="login-code" name="code" maxlength="4" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="login-question-id" class="block text-sm font-medium text-gray-700 mb-1">ID da Pergunta
+                        de Segurança:</label>
+                    <input type="text" id="login-question-id" name="question_id" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="login-answer" class="block text-sm font-medium text-gray-700 mb-1">Resposta da Pergunta
+                        de Segurança:</label>
+                    <input type="password" id="login-answer" name="answer" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">Entrar</button>
+            </form>
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Não tem uma conta? <a href="#" id="toggle-to-register"
+                    class="text-blue-600 hover:text-blue-800 font-medium">Crie uma aqui</a>.
             </p>
         </div>
+
+        <!-- Register Form Section -->
+        <div id="register-form-section" class="form-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Criar Conta</h2>
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="register-code" class="block text-sm font-medium text-gray-700 mb-1">Escolha um Código de
+                        Acesso (4 dígitos):</label>
+                    <input type="text" id="register-code" name="code" maxlength="4" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="register-question-id" class="block text-sm font-medium text-gray-700 mb-1">Escolha uma
+                        Pergunta de Segurança (ex: "Cor Favorita"):</label>
+                    <input type="text" id="register-question-id" name="question_id" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="register-answer" class="block text-sm font-medium text-gray-700 mb-1">Resposta da
+                        Pergunta de Segurança:</label>
+                    <input type="password" id="register-answer" name="answer" required
+                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <button type="submit"
+                    class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-300">Criar
+                    Conta</button>
+            </form>
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Já tem uma conta? <a href="#" id="toggle-to-login"
+                    class="text-blue-600 hover:text-blue-800 font-medium">Faça login aqui</a>.
+            </p>
+        </div>
+
+        <!-- Privacy Policy Link -->
+        <p class="mt-6 text-center text-sm text-gray-600">
+            <a href="#" id="privacy-link" class="text-blue-600 hover:text-blue-800 font-medium">Política de
+                Privacidade</a>
+        </p>
     </div>
 
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal"
+        class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full relative">
+            <button id="close-modal-btn"
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Política de Privacidade</h3>
+            <div class="text-gray-700 text-sm max-h-96 overflow-y-auto pr-4">
+                <p class="mb-2">A sua privacidade é importante para nós. Esta política de privacidade explica como
+                    recolhemos, usamos e protegemos as suas informações pessoais.</p>
+                <h4 class="font-semibold mt-4 mb-2">Informações que Recolhemos</h4>
+                <p class="mb-2">Recolhemos informações que você nos fornece diretamente, como o seu código de acesso, ID
+                    da pergunta de segurança e resposta ao criar uma conta. Não recolhemos informações sensíveis como
+                    nomes, endereços ou dados de contacto.</p>
+                <h4 class="font-semibold mt-4 mb-2">Como Usamos as Suas Informações</h4>
+                <p class="mb-2">As informações recolhidas são usadas exclusivamente para autenticar a sua identidade e
+                    gerir o seu acesso à aplicação "Cantinho da Memória". O seu código de acesso e a resposta à pergunta
+                    de segurança são a sua chave de acesso e devem ser mantidos em sigilo.</p>
+                <h4 class="font-semibold mt-4 mb-2">Partilha de Informações</h4>
+                <p class="mb-2">Não partilhamos as suas informações pessoais com terceiros. Os seus dados são
+                    armazenados de forma segura e utilizados apenas para os fins descritos nesta política.</p>
+                <h4 class="font-semibold mt-4 mb-2">Segurança dos Dados</h4>
+                <p class="mb-2">Implementamos medidas de segurança para proteger as suas informações contra acesso não
+                    autorizado, alteração, divulgação ou destruição. No entanto, lembre-se que nenhum método de
+                    transmissão pela Internet ou método de armazenamento eletrónico é 100% seguro.</p>
+                <h4 class="font-semibold mt-4 mb-2">Alterações a Esta Política</h4>
+                <p class="mb-2">Podemos atualizar a nossa Política de Privacidade periodicamente. Iremos notificá-lo de
+                    quaisquer alterações publicando a nova Política de Privacidade nesta página.</p>
+                <p class="mt-4">Ao usar a aplicação "Cantinho da Memória", você concorda com a recolha e uso de
+                    informações de acordo com esta política.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Block -->
     <script>
-        const API_URL = 'http://127.0.0.1:8000';
+        document.addEventListener('DOMContentLoaded', () => {
+            // ==============================================================================
+            // Conexão com o Backend (API)
+            // ==============================================================================
+            // Define a URL base da API, adaptando-se entre ambiente local e de produção no Render.
+            const API_URL = window.location.hostname === 'localhost'
+                ? 'http://127.0.0.1:8000'
+                : 'https://cantinho-da-memoria-backend.onrender.com';
 
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const toggleToRegisterLink = document.getElementById('toggle-to-register');
-        const toggleToLoginLink = document.getElementById('toggle-to-login');
-        const loginSection = document.getElementById('login-form-section');
-        const registerSection = document.getElementById('register-form-section');
-        const messageBox = document.getElementById('message-box');
+            // Função auxiliar para fazer requisições à API
+            async function apiRequest(endpoint, method = 'GET', data = null) {
+                const url = `${API_URL}/${endpoint}`; // Usa a API_URL definida condicionalmente
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
 
-        // NOVOS ELEMENTOS: Para a política de privacidade
-        const privacyLink = document.getElementById('privacy-link');
-        const privacyModal = document.getElementById('privacy-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-
-        function showMessage(message, isError = false) {
-            messageBox.textContent = message;
-            messageBox.className = isError ? 'error' : 'success';
-            messageBox.style.display = 'block';
-            setTimeout(() => {
-                messageBox.style.display = 'none';
-            }, 5000);
-        }
-
-        // Alterna entre os formulários de login e registro
-        function toggleForms() {
-            if (loginSection.style.display === 'none') {
-                loginSection.style.display = 'block';
-                registerSection.style.display = 'none';
-                loginSection.classList.remove('slide-out');
-                loginSection.classList.add('slide-in');
-            } else {
-                loginSection.style.display = 'none';
-                registerSection.style.display = 'block';
-                registerSection.classList.remove('slide-out');
-                registerSection.classList.add('slide-in');
-            }
-        }
-
-        toggleToRegisterLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleForms();
-        });
-
-        toggleToLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            toggleForms();
-        });
-
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const code = document.getElementById('register-code').value;
-            const question_id = document.getElementById('register-question-id').value;
-            const answer = document.getElementById('register-answer').value;
-
-            try {
-                const response = await fetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, question_id, answer })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    showMessage(data.message);
-                    registerForm.reset();
-                    toggleForms(); // Volta para o login após o registro bem-sucedido
-                } else {
-                    const errorData = await response.json();
-                    showMessage(errorData.detail, true);
+                if (data) {
+                    options.body = JSON.stringify(data);
                 }
-            } catch (error) {
-                console.error('Erro ao registrar:', error);
-                showMessage('Falha na conexão com o servidor.', true);
-            }
-        });
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const code = document.getElementById('login-code').value;
-            const question_id = document.getElementById('login-question-id').value;
-            const answer = document.getElementById('login-answer').value;
-
-            try {
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, question_id, answer })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    showMessage(data.message);
-                    localStorage.setItem('user_id', data.user_id);
-                    // Redireciona para a página de lembretes
-                    window.location.href = 'lembretes.html';
-                } else {
-                    const errorData = await response.json();
-                    showMessage(errorData.detail, true);
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || 'Erro na requisição da API');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erro na requisição da API:', error);
+                    throw error;
                 }
-            } catch (error) {
-                console.error('Erro ao fazer login:', error);
-                showMessage('Falha na conexão com o servidor.', true);
             }
-        });
 
-        // Lógica para mostrar e esconder o modal de privacidade
-        privacyLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Impede o link de navegar
-            privacyModal.style.display = 'flex';
-        });
+            // ==============================================================================
+            // Elementos HTML e Funções de Feedback
+            // ==============================================================================
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const toggleToRegisterLink = document.getElementById('toggle-to-register');
+            const toggleToLoginLink = document.getElementById('toggle-to-login');
+            const loginSection = document.getElementById('login-form-section');
+            const registerSection = document.getElementById('register-form-section');
+            const messageBox = document.getElementById('message-box');
 
-        closeModalBtn.addEventListener('click', () => {
-            privacyModal.style.display = 'none';
-        });
+            // NOVOS ELEMENTOS: Para a política de privacidade
+            const privacyLink = document.getElementById('privacy-link');
+            const privacyModal = document.getElementById('privacy-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
 
-        privacyModal.addEventListener('click', (event) => {
-            if (event.target === privacyModal) {
-                privacyModal.style.display = 'none';
+            /**
+             * Exibe uma mensagem de feedback na tela.
+             * @param {string} message - A mensagem a ser exibida.
+             * @param {boolean} isError - Indica se é uma mensagem de erro.
+             */
+            function showMessage(message, isError = false) {
+                messageBox.textContent = message;
+                messageBox.className = isError ? 'message-box error' : 'message-box success';
+                messageBox.style.display = 'block';
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 5000);
             }
+
+            // Alterna entre os formulários de login e registro
+            function toggleForms() {
+                if (loginSection.style.display === 'none') {
+                    loginSection.style.display = 'block';
+                    registerSection.style.display = 'none';
+                    loginSection.classList.remove('slide-out');
+                    loginSection.classList.add('slide-in');
+                } else {
+                    loginSection.style.display = 'none';
+                    registerSection.style.display = 'block';
+                    registerSection.classList.remove('slide-out');
+                    registerSection.classList.add('slide-in');
+                }
+            }
+
+            // ==============================================================================
+            // Event Listeners para Formulários e Navegação
+            // ==============================================================================
+
+            if (toggleToRegisterLink) {
+                toggleToRegisterLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleForms();
+                });
+            }
+
+            if (toggleToLoginLink) {
+                toggleToLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    toggleForms();
+                });
+            }
+
+            if (registerForm) {
+                registerForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const code = document.getElementById('register-code').value;
+                    const question_id = document.getElementById('register-question-id').value;
+                    const answer = document.getElementById('register-answer').value;
+
+                    try {
+                        // Usando a função apiRequest para registro
+                        const response = await apiRequest('register', 'POST', { code, question_id, answer });
+
+                        if (response) { // apiRequest já trata erros, então se chegou aqui, foi sucesso
+                            showMessage(response.message, false);
+                            registerForm.reset();
+                            toggleForms(); // Volta para o login após o registro bem-sucedido
+                        }
+                    } catch (error) {
+                        console.error('Erro ao registrar:', error);
+                        showMessage('Falha na conexão com o servidor.', true);
+                    }
+                });
+            }
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const code = document.getElementById('login-code').value;
+                    const question_id = document.getElementById('login-question-id').value;
+                    const answer = document.getElementById('login-answer').value;
+
+                    try {
+                        // Usando a função apiRequest para login
+                        const response = await apiRequest('login', 'POST', { code, question_id, answer });
+
+                        if (response) { // apiRequest já trata erros, então se chegou aqui, foi sucesso
+                            showMessage(response.message, false);
+                            localStorage.setItem('user_id', response.user_id);
+                            // Redireciona para a página de lembretes
+                            window.location.href = 'lembretes.html';
+                        }
+                    } catch (error) {
+                        console.error('Erro ao fazer login:', error);
+                        showMessage('Falha na conexão com o servidor.', true);
+                    }
+                });
+            }
+
+            // Lógica para mostrar e esconder o modal de privacidade
+            if (privacyLink) {
+                privacyLink.addEventListener('click', (event) => {
+                    event.preventDefault(); // Impede o link de navegar
+                    if (privacyModal) {
+                        privacyModal.style.display = 'flex';
+                    }
+                });
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    if (privacyModal) {
+                        privacyModal.style.display = 'none';
+                    }
+                });
+            }
+
+            if (privacyModal) {
+                privacyModal.addEventListener('click', (event) => {
+                    if (event.target === privacyModal) {
+                        privacyModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // ==============================================================================
+            // Lógica para a Página de Lembretes (Exemplo) - Mantido do código anterior
+            // ==============================================================================
+            // Nota: Se a lógica de lembretes estiver em outro arquivo JS (ex: lembretes.js),
+            // esta seção pode ser removida daqui para evitar duplicação.
+            const lembretesList = document.getElementById('lembretesList');
+            const lembreteForm = document.getElementById('lembreteForm');
+            const userId = localStorage.getItem('user_id'); // Obtém o user_id do localStorage
+
+            if (lembretesList && userId) {
+                // Função para carregar e exibir lembretes
+                async function loadLembretes() {
+                    try {
+                        const lembretes = await apiRequest(`lembretes/${userId}`);
+                        lembretesList.innerHTML = ''; // Limpa a lista existente
+                        if (lembretes.length === 0) {
+                            lembretesList.innerHTML = '<p>Nenhum lembrete encontrado. Crie um novo!</p>';
+                        } else {
+                            lembretes.forEach(lembrete => {
+                                const li = document.createElement('li');
+                                li.textContent = `${lembrete.tarefa} - ${lembrete.data} às ${lembrete.hora} (${lembrete.repeticao})`;
+
+                                const deleteBtn = document.createElement('button');
+                                deleteBtn.textContent = 'Excluir';
+                                deleteBtn.className = 'delete-btn';
+                                deleteBtn.onclick = async () => {
+                                    try {
+                                        await apiRequest(`lembretes/${lembrete.id}`, 'DELETE');
+                                        showMessage('Lembrete excluído com sucesso!', false);
+                                        loadLembretes(); // Recarrega a lista
+                                    } catch (error) {
+                                        console.error('Erro ao excluir lembrete:', error);
+                                        showMessage('Erro ao excluir lembrete.', true);
+                                    }
+                                };
+                                li.appendChild(deleteBtn);
+                                lembretesList.appendChild(li);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao carregar lembretes:', error);
+                        showMessage('Erro ao carregar lembretes.', true);
+                    }
+                }
+
+                loadLembretes(); // Carrega os lembretes ao carregar a página
+
+                // Lógica para adicionar novo lembrete
+                if (lembreteForm) {
+                    lembreteForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const tarefa = document.getElementById('tarefa').value;
+                        const data = document.getElementById('data').value;
+                        const hora = document.getElementById('hora').value;
+                        const repeticao = document.getElementById('repeticao').value;
+
+                        try {
+                            await apiRequest('lembretes', 'POST', { user_id: userId, tarefa, data, hora, repeticao });
+                            showMessage('Lembrete adicionado com sucesso!', false);
+                            lembreteForm.reset();
+                            loadLembretes(); // Recarrega a lista de lembretes
+                        } catch (error) {
+                            console.error('Erro ao adicionar lembrete:', error);
+                            showMessage('Erro ao adicionar lembrete.', true);
+                        }
+                    });
+                }
+            } else if (lembretesList && !userId) {
+                // Se estiver na página de lembretes mas não houver user_id no localStorage
+                lembretesList.innerHTML = '<p>Você precisa fazer login para ver seus lembretes.</p>';
+                // Opcional: redirecionar para a página de login
+                // window.location.href = 'index.html';
+            }
+
+            // ==============================================================================
+            // Lógica para Logout
+            // ==============================================================================
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    localStorage.removeItem('user_id'); // Remove o user_id do localStorage
+                    window.location.href = 'index.html'; // Redireciona para a página de login
+                });
+            }
+
+            // ==============================================================================
+            // Lógica para Navegação (Exemplo)
+            // ==============================================================================
+            // Adicione event listeners para os links de navegação se você tiver um menu
+            // Exemplo:
+            // document.getElementById('linkLembretes').addEventListener('click', () => {
+            //     window.location.href = 'lembretes.html';
+            // });
+            // document.getElementById('linkMedicamentos').addEventListener('click', () => {
+            //     window.location.href = 'medicamentos.html';
+            // });
+            // ... e assim por diante
         });
     </script>
-</body>
-
-</html>

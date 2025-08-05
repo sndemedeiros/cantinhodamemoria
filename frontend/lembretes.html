@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -58,22 +59,15 @@
         <section class="list-container">
             <h2>Lista de Lembretes</h2>
             <ul id="reminders-list" class="item-list">
+                <!-- Lembretes serão carregados aqui pelo JavaScript -->
             </ul>
         </section>
     </main>
 
-    <script src="lembretes.js"></script>
-    <script>
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-            document.getElementById('welcome-message').textContent = `Olá, ${userId}`;
-        }
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('user_id');
-            window.location.href = 'index.html';
-        });
-    </script>
+    <!-- Importa o api.js primeiro, pois lembretes.js depende dele -->
+    <script type="module" src="./api.js"></script>
+    <!-- Importa a lógica específica da página de lembretes -->
+    <script type="module" src="./lembretes.js"></script>
 </body>
 
 </html>

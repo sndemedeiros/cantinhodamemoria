@@ -1,138 +1,111 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // A URL base da nossa API do FastAPI
-    const API_URL = 'http://127.0.0.1:8000';
+// lembretes.js - Lógica específica para a página de lembretes
 
-    // Obter o ID do usuário do localStorage
-    const currentUserId = localStorage.getItem('user_id');
+// Importa as funções apiRequest e showMessage do arquivo api.js
+import { apiRequest, showMessage } from './api.js';
 
-    // Elementos HTML
-    const form = document.getElementById('reminder-form');
-    const taskInput = document.getElementById('task-input');
-    const dateInput = document.getElementById('date-input');
-    const timeInput = document.getElementById('time-input');
-    const repetitionInput = document.getElementById('repetition-input');
-    const remindersList = document.getElementById('reminders-list');
-    const messageBox = document.getElementById('message-box');
+document.addEventListener('DOMContentLoaded', async () => {
+    const welcomeMessage = document.getElementById('welcome-message');
+    const logoutButton = document.getElementById('logout-btn');
+    const reminderForm = document.getElementById('reminder-form');
+    const remindersList = document.getElementById('reminders-list'); // ID da sua lista de lembretes
 
-    // Verificar se o usuário está logado, caso contrário redireciona
-    if (!currentUserId) {
-        window.location.href = 'login.html';
-        return;
-    }
+    const userId = localStorage.getItem('user_id');
 
-    /**
-     * Exibe uma mensagem de feedback na tela.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {boolean} isError - Indica se é uma mensagem de erro.
-     */
-    function showMessage(message, isError = false) {
-        messageBox.textContent = message;
-        messageBox.className = isError ? 'message-box error' : 'message-box success';
-        messageBox.style.display = 'block';
+    // Redireciona se o usuário não estiver logado
+    if (!userId) {
+        showMessage('Você precisa estar logado para acessar esta página.', true);
+        // Pequeno atraso para a mensagem aparecer antes de redirecionar
         setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 5000); // Esconde a mensagem depois de 5 segundos
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        }, 1500);
+        return; // Interrompe a execução do script
     }
 
-    // Função para buscar e exibir os lembretes da API
-    async function fetchAndDisplayReminders() {
-        try {
-            const response = await fetch(`${API_URL}/lembretes/${currentUserId}`);
-            const reminders = await response.json();
+    // Atualiza a mensagem de boas-vindas
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Olá, ${userId}`;
+    }
 
-            remindersList.innerHTML = ''; // Limpa a lista antes de adicionar
-            if (reminders.length === 0) {
-                remindersList.innerHTML = '<p>Nenhum lembrete cadastrado.</p>';
+    // Lógica para Logout
+    if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user_id'); // Remove o user_id do localStorage
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        });
+    }
+
+    // Função para carregar e exibir lembretes
+    async function loadReminders() {
+        if (!userId) return; // Garante que há um userId antes de tentar carregar
+
+        try {
+            // Exibe "Carregando lembretes..." enquanto a requisição é feita
+            remindersList.innerHTML = '<p>Carregando lembretes...</p>';
+
+            // Usa a função apiRequest importada
+            const lembretes = await apiRequest(`lembretes/${userId}`);
+            remindersList.innerHTML = ''; // Limpa a mensagem de carregamento
+
+            if (lembretes.length === 0) {
+                remindersList.innerHTML = '<p>Nenhum lembrete encontrado. Crie um novo!</p>';
             } else {
-                reminders.forEach(reminder => {
-                    const reminderCard = document.createElement('li');
-                    reminderCard.className = 'reminder-card';
-                    reminderCard.innerHTML = `
-                        <div class="reminder-info">
-                            <p class="title">${reminder.tarefa}</p>
-                            <p>${reminder.data} às ${reminder.hora} (${reminder.repeticao})</p>
+                lembretes.forEach(lembrete => {
+                    const li = document.createElement('li');
+                    // O seu style.css já estiliza 'item-list li', então não precisamos de className aqui.
+                    // A classe 'item-info' e 'delete-btn' já estão no seu CSS.
+                    li.innerHTML = `
+                        <div class="item-info">
+                            <p class="title">${lembrete.tarefa}</p>
+                            <p>${lembrete.data} às ${lembrete.hora} (${lembrete.repeticao})</p>
                         </div>
-                        <button class="delete-btn" data-id="${reminder.id}">❌</button>
+                        <button class="delete-btn" data-id="${lembrete.id}"><i class="fas fa-trash-alt"></i></button>
                     `;
-                    remindersList.appendChild(reminderCard);
+                    remindersList.appendChild(li);
                 });
-                // Adicionar event listeners aos botões de deletar
+
+                // Adiciona event listeners para os botões de exclusão
                 document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', deleteReminder);
+                    button.onclick = async (event) => {
+                        const lembreteId = event.currentTarget.dataset.id; // Usar currentTarget para garantir que o elemento correto é referenciado
+                        try {
+                            await apiRequest(`lembretes/${lembreteId}`, 'DELETE');
+                            showMessage('Lembrete excluído com sucesso!', false);
+                            loadReminders(); // Recarrega a lista
+                        } catch (error) {
+                            console.error('Erro ao excluir lembrete:', error);
+                            showMessage('Erro ao excluir lembrete.', true);
+                        }
+                    };
                 });
             }
         } catch (error) {
-            console.error('Erro ao buscar lembretes:', error);
+            console.error('Erro ao carregar lembretes:', error);
             showMessage('Erro ao carregar lembretes.', true);
         }
     }
 
-    // Função para adicionar um novo lembrete
-    async function createReminder(event) {
-        event.preventDefault();
+    // Lógica para adicionar novo lembrete
+    if (reminderForm) {
+        reminderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tarefa = document.getElementById('task-input').value; // ID do seu input de tarefa
+            const data = document.getElementById('date-input').value;   // ID do seu input de data
+            const hora = document.getElementById('time-input').value;   // ID do seu input de hora
+            const repeticao = document.getElementById('repetition-input').value; // ID do seu input de repetição
 
-        const task = taskInput.value;
-        const date = dateInput.value;
-        const time = timeInput.value;
-        const repetition = repetitionInput.value;
-
-        const reminderData = {
-            user_id: currentUserId,
-            tarefa: task,
-            data: date,
-            hora: time,
-            repeticao: repetition
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/lembretes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reminderData)
-            });
-
-            if (response.ok) {
-                showMessage('Lembrete adicionado com sucesso!');
-                form.reset();
-                fetchAndDisplayReminders();
-            } else {
+            try {
+                await apiRequest('lembretes', 'POST', { user_id: userId, tarefa, data, hora, repeticao });
+                showMessage('Lembrete adicionado com sucesso!', false);
+                reminderForm.reset();
+                loadReminders(); // Recarrega a lista de lembretes
+            } catch (error) {
+                console.error('Erro ao adicionar lembrete:', error);
                 showMessage('Erro ao adicionar lembrete.', true);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar lembrete:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
+        });
     }
 
-    // Função para deletar um lembrete
-    async function deleteReminder(event) {
-        const reminderId = event.target.dataset.id;
-        try {
-            const response = await fetch(`${API_URL}/lembretes/${reminderId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                showMessage('Lembrete excluído com sucesso!');
-                fetchAndDisplayReminders();
-            } else {
-                showMessage('Erro ao excluir lembrete.', true);
-            }
-        } catch (error) {
-            console.error('Erro ao excluir lembrete:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
-    }
-
-    // Event Listeners
-    if (form) {
-        form.addEventListener('submit', createReminder);
-    }
-
-    // Inicializar a lista de lembretes quando a página carrega
-    window.addEventListener('load', () => {
-        fetchAndDisplayReminders();
-    });
+    // Carrega os lembretes ao carregar a página (após todas as definições)
+    loadReminders();
 });

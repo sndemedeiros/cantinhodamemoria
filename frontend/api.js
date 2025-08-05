@@ -83,3 +83,17 @@ export function showMessage(message, isError = false) {
         console.warn('Elemento #message-box não encontrado. Mensagem:', message);
     }
 }
+
+/**
+ * Formata uma string de data de YYYY-MM-DD para DD/MM/YYYY.
+ * @param {string} dateString - A string de data no formato YYYY-MM-DD.
+ * @returns {string} - A string de data formatada para DD/MM/YYYY.
+ */
+export function formatDateForDisplay(dateString) {
+    if (!dateString) return '';
+    const parts = dateString.split('-'); // Divide em [YYYY, MM, DD]
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`; // Reorganiza para DD/MM/YYYY
+    }
+    return dateString; // Retorna o original se o formato não for o esperado
+}

@@ -1,13 +1,13 @@
 // lembretes.js - Lógica específica para a página de lembretes
 
-// Importa as funções apiRequest e showMessage do arquivo api.js
-import { apiRequest, showMessage } from './api.js';
+// Importa as funções apiRequest, showMessage e formatDateForDisplay do arquivo api.js
+import { apiRequest, showMessage, formatDateForDisplay } from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const welcomeMessage = document.getElementById('welcome-message');
     const logoutButton = document.getElementById('logout-btn');
-    const reminderForm = document.getElementById('reminder-form');
-    const remindersList = document.getElementById('reminders-list'); // ID da sua lista de lembretes
+    const lembreteForm = document.getElementById('lembrete-form'); // ID do formulário de lembretes
+    const lembretesList = document.getElementById('lembretes-list'); // ID da sua lista de lembretes
 
     const userId = localStorage.getItem('user_id');
 
@@ -36,42 +36,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Função para carregar e exibir lembretes
-    async function loadReminders() {
+    async function loadLembretes() {
         if (!userId) return; // Garante que há um userId antes de tentar carregar
 
         try {
             // Exibe "Carregando lembretes..." enquanto a requisição é feita
-            remindersList.innerHTML = '<p>Carregando lembretes...</p>';
+            lembretesList.innerHTML = '<p>Carregando lembretes...</p>';
 
             // Usa a função apiRequest importada
             const lembretes = await apiRequest(`lembretes/${userId}`);
-            remindersList.innerHTML = ''; // Limpa a mensagem de carregamento
+            lembretesList.innerHTML = ''; // Limpa a mensagem de carregamento
 
             if (lembretes.length === 0) {
-                remindersList.innerHTML = '<p>Nenhum lembrete encontrado. Crie um novo!</p>';
+                lembretesList.innerHTML = '<p>Nenhum lembrete encontrado. Crie um novo!</p>';
             } else {
                 lembretes.forEach(lembrete => {
                     const li = document.createElement('li');
-                    // O seu style.css já estiliza 'item-list li', então não precisamos de className aqui.
-                    // A classe 'item-info' e 'delete-btn' já estão no seu CSS.
+                    li.className = 'lembrete-card'; // Mantém a classe para o seu CSS
+
+                    // Formata a data antes de exibir
+                    const formattedDate = formatDateForDisplay(lembrete.data);
+
                     li.innerHTML = `
                         <div class="item-info">
-                            <p class="title">${lembrete.tarefa}</p>
-                            <p>${lembrete.data} às ${lembrete.hora} (${lembrete.repeticao})</p>
+                            <h3 class="title">${lembrete.tarefa}</h3>
+                            <p>Data: ${formattedDate} - Hora: ${lembrete.hora}</p>
+                            <p>Repetição: ${lembrete.repeticao}</p>
                         </div>
                         <button class="delete-btn" data-id="${lembrete.id}"><i class="fas fa-trash-alt"></i></button>
                     `;
-                    remindersList.appendChild(li);
+                    lembretesList.appendChild(li);
                 });
 
                 // Adiciona event listeners para os botões de exclusão
                 document.querySelectorAll('.delete-btn').forEach(button => {
                     button.onclick = async (event) => {
-                        const lembreteId = event.currentTarget.dataset.id; // Usar currentTarget para garantir que o elemento correto é referenciado
+                        const lembreteId = event.currentTarget.dataset.id; // Usar currentTarget
                         try {
                             await apiRequest(`lembretes/${lembreteId}`, 'DELETE');
                             showMessage('Lembrete excluído com sucesso!', false);
-                            loadReminders(); // Recarrega a lista
+                            loadLembretes(); // Recarrega a lista
                         } catch (error) {
                             console.error('Erro ao excluir lembrete:', error);
                             showMessage('Erro ao excluir lembrete.', true);
@@ -86,19 +90,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Lógica para adicionar novo lembrete
-    if (reminderForm) {
-        reminderForm.addEventListener('submit', async (e) => {
+    if (lembreteForm) {
+        lembreteForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const tarefa = document.getElementById('task-input').value; // ID do seu input de tarefa
-            const data = document.getElementById('date-input').value;   // ID do seu input de data
-            const hora = document.getElementById('time-input').value;   // ID do seu input de hora
-            const repeticao = document.getElementById('repetition-input').value; // ID do seu input de repetição
+            const tarefa = document.getElementById('tarefa-input').value;
+            const data = document.getElementById('data-input').value;
+            const hora = document.getElementById('hora-input').value;
+            const repeticao = document.getElementById('repeticao-input').value;
 
             try {
                 await apiRequest('lembretes', 'POST', { user_id: userId, tarefa, data, hora, repeticao });
                 showMessage('Lembrete adicionado com sucesso!', false);
-                reminderForm.reset();
-                loadReminders(); // Recarrega a lista de lembretes
+                lembreteForm.reset();
+                loadLembretes(); // Recarrega a lista de lembretes
             } catch (error) {
                 console.error('Erro ao adicionar lembrete:', error);
                 showMessage('Erro ao adicionar lembrete.', true);
@@ -107,5 +111,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Carrega os lembretes ao carregar a página (após todas as definições)
-    loadReminders();
+    loadLembretes();
 });

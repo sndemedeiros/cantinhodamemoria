@@ -54,7 +54,7 @@ export async function apiRequest(endpoint, method = 'GET', data = null) {
             if (i === MAX_RETRIES - 1 || !(error instanceof TypeError && error.message.includes('Failed to fetch'))) {
                 throw error; // O erro será capturado pela função que chamou (ex: loadLembretes)
             } else {
-                // Para erros de rede em retentativas que não sÃ£o a última, apenas espera e tenta novamente
+                // Para erros de rede em retentativas que não são a última, apenas espera e tenta novamente
                 console.warn(`Tentativa ${i + 1} falhou para ${endpoint} (Erro de rede). Retentando em ${currentDelay / 1000}s...`);
                 await new Promise(res => setTimeout(res, currentDelay));
                 currentDelay *= 2; // Atraso exponencial
@@ -82,18 +82,4 @@ export function showMessage(message, isError = false) {
     } else {
         console.warn('Elemento #message-box não encontrado. Mensagem:', message);
     }
-}
-
-/**
- * Formata uma string de data de YYYY-MM-DD para DD/MM/YYYY.
- * @param {string} dateString - A string de data no formato YYYY-MM-DD.
- * @returns {string} - A string de data formatada para DD/MM/YYYY.
- */
-export function formatDateForDisplay(dateString) {
-    if (!dateString) return '';
-    const parts = dateString.split('-'); // Divide em [YYYY, MM, DD]
-    if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`; // Reorganiza para DD/MM/YYYY
-    }
-    return dateString; // Retorna o original se o formato não for o esperado
 }

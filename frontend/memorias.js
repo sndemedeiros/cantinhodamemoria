@@ -1,7 +1,7 @@
 // memorias.js - Lógica específica para a página de memórias
 
-// Importa as funções apiRequest, showMessage e formatDateForDisplay do arquivo api.js
-import { apiRequest, showMessage, formatDateForDisplay } from './api.js';
+// Importa as funções apiRequest e showMessage do arquivo api.js
+import { apiRequest, showMessage } from './api.js'; // Removido formatDateForDisplay
 
 document.addEventListener('DOMContentLoaded', async () => {
     const welcomeMessage = document.getElementById('welcome-message');
@@ -59,13 +59,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? (memory.imagem_url.startsWith('data:') ? memory.imagem_url : `https://cantinho-da-memoria-backend.onrender.com/${memory.imagem_url}`)
                         : 'https://placehold.co/100x100?text=Sem+Imagem'; // Placeholder se não houver imagem
 
-                    // Formata a data antes de exibir
-                    const formattedDate = formatDateForDisplay(memory.data);
-
+                    // Data será exibida no formato original (YYYY-MM-DD)
                     li.innerHTML = `
                         <div class="item-info">
                             <h3 class="title">${memory.titulo}</h3>
-                            <p class="date">Data: ${formattedDate}</p>
+                            <p class="date">Data: ${memory.data}</p> <!-- Removido formatDateForDisplay -->
                             <p>${memory.descricao}</p>
                             <img src="${imageUrl}" alt="Imagem da memória" class="memory-image" onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=Erro+Imagem';">
                         </div>

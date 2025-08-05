@@ -54,7 +54,7 @@ export async function apiRequest(endpoint, method = 'GET', data = null) {
             if (i === MAX_RETRIES - 1 || !(error instanceof TypeError && error.message.includes('Failed to fetch'))) {
                 throw error; // O erro será capturado pela função que chamou (ex: loadLembretes)
             } else {
-                // Para erros de rede em retentativas que não são a última, apenas espera e tenta novamente
+                // Para erros de rede em retentativas que não sÃ£o a última, apenas espera e tenta novamente
                 console.warn(`Tentativa ${i + 1} falhou para ${endpoint} (Erro de rede). Retentando em ${currentDelay / 1000}s...`);
                 await new Promise(res => setTimeout(res, currentDelay));
                 currentDelay *= 2; // Atraso exponencial

@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Converte o canvas para Base64 com qualidade especificada
                     const resizedDataUrl = canvas.toDataURL(outputMimeType, compressionQuality);
+                    console.log(`Imagem redimensionada para: ${width}x${height}, Tipo: ${outputMimeType}, Qualidade: ${compressionQuality}`);
                     resolve(resizedDataUrl);
                 };
                 img.onerror = (error) => {
@@ -172,10 +173,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('descricao', descricao);
 
             if (imagemFile) {
+                console.log(`Tamanho original da imagem: ${imagemFile.size / 1024} KB`);
                 try {
-                    // Redimensiona e comprime a imagem
-                    // MaxWidth=800px, MaxHeight=800px, Qualidade=0.6 (60% para JPEG)
-                    const resizedImageBase64 = await resizeImage(imagemFile, 800, 800, 0.6); // Qualidade ajustada
+                    // Redimensiona e comprime a imagem com parâmetros mais agressivos
+                    // MaxWidth=600px, MaxHeight=600px, Qualidade=0.5 (50% para JPEG)
+                    const resizedImageBase64 = await resizeImage(imagemFile, 600, 600, 0.5); // Qualidade e dimensões ajustadas
 
                     // Converte a string Base64 de volta para um Blob para adicionar ao FormData
                     const byteString = atob(resizedImageBase64.split(',')[1]);
@@ -187,17 +189,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     const resizedBlob = new Blob([ab], { type: mimeString });
 
+                    console.log(`Tamanho do Blob redimensionado (Base64 decodificado): ${resizedBlob.size / 1024} KB`);
+
                     // Verifica o tamanho do Blob antes de enviar (limite do Firestore é 1MB, então ~800KB para segurança)
                     const MAX_BLOB_SIZE_BYTES = 800 * 1024; // 800 KB
                     if (resizedBlob.size > MAX_BLOB_SIZE_BYTES) {
-                        showMessage('A imagem, mesmo após redimensionamento, é muito grande (limite ~800KB). Tente uma imagem menor.', true);
+                        showMessage(`A imagem, mesmo após redimensionamento, ainda é muito grande (${(resizedBlob.size / 1024).toFixed(2)}KB). O limite é de aproximadamente ${MAX_BLOB_SIZE_BYTES / 1024}KB. Tente uma imagem com menos detalhes ou menor resolução original.`, true);
                         return; // Impede o envio
                     }
 
                     formData.append('imagem', resizedBlob, imagemFile.name); // Usa o Blob redimensionado
                 } catch (error) {
                     console.error('Erro ao processar imagem:', error);
-                    showMessage('Erro ao processar a imagem. Tente uma imagem diferente ou menor.', true);
+                    showMessage('Erro ao processar a imagem. Certifique-se de que é um formato de imagem válido e tente novamente.', true);
                     return; // Impede o envio se o redimensionamento falhar
                 }
             }

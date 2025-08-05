@@ -38,8 +38,6 @@
         /* Estilos para as transições de formulário - Simplificados para evitar sobreposição */
         .form-section {
             transition: opacity 0.5s ease-in-out;
-            /* Removido position: absolute, top, left, width para evitar sobreposição inesperada */
-            /* A visibilidade será controlada por display: block/none */
         }
 
         .form-section.hidden {
@@ -58,7 +56,6 @@
         }
 
         /* Ajuste para o container para acomodar a posição relativa dos formulários */
-        /* A cor de fundo e padding virão do login_styles.css */
         .main-content-container {
             /* Nova classe para o container principal */
             min-height: 450px;
@@ -69,7 +66,6 @@
             /* Espaço para o logo e message box */
             padding-bottom: 2rem;
             /* Espaço para o link de privacidade */
-            /* Removido bg-white, p-8, rounded-lg, shadow-lg, overflow-hidden para usar login_styles.css */
         }
     </style>
     <!-- Link para o seu arquivo CSS personalizado - ESTE É O SEU CSS PRINCIPAL -->
@@ -491,52 +487,3 @@
 </body>
 
 </html>
-```
-
----
-
-Você está a ver avisos no console sobre IDs não únicos (`#register-form`, `#register-question-id`) e erros `Unchecked
-runtime.lastError`.
-
-Os IDs não únicos são um problema real que precisa ser corrigido, pois podem causar comportamento inesperado no
-JavaScript. Os erros `Unchecked runtime.lastError` são geralmente de extensões do navegador e podem ser ignorados por
-enquanto.
-
-O problema de IDs duplicados acontece porque, no seu arquivo `index.html`, os elementos com esses IDs (como o formulário
-de registo e os seus campos) estão a ser definidos mais de uma vez. Para corrigir isso, precisamos garantir que o seu
-`index.html` contenha apenas uma única e correta versão de cada elemento com `id`.
-
-O Canvas "index.html completo com layout e cores do login_styles.css" já foi atualizado para conter apenas uma instância
-de cada formulário e seus elementos, e também inclui a lógica da `API_URL` condicional e o uso do seu
-`login_styles.css`.
-
-**A principal ação que você precisa fazer é substituir TODO o conteúdo do seu arquivo `index.html` local pelo código
-completo fornecido no Canvas.**
-
----
-
-### **Próximos Passos Cruciais:**
-
-1. **Copie TODO o código** do Canvas "index.html completo com layout e cores do login_styles.css" e cole-o no seu
-arquivo **`index.html`** local (na pasta `frontend`), **substituindo todo o conteúdo atual**.
-2. **Salve o arquivo `index.html`**.
-3. **Envie as alterações para o GitHub** usando o terminal na pasta raiz do seu projeto (`cantinho_da_memoria`):
-```bash
-git add frontend/index.html
-git commit -m "Corrige IDs duplicados no index.html e garante layout e cores do login_styles.css"
-git push origin main
-```
-4. **Dispare um Deploy Manual do Frontend no Render (com Limpeza de Cache de Construção)**:
-* Vá para o seu [Render Dashboard](https://dashboard.render.com/).
-* Clique no seu serviço **`cantinho-da-memoria-frontend`** (o Static Site).
-* No canto superior direito, clique em **"Manual Deploy"** e selecione **"Clear Build Cache & Deploy"** (Limpar Cache de
-Construção e Fazer Deploy).
-
----
-
-Este passo de "Clear Build Cache & Deploy" é fundamental para garantir que o Render use a versão mais recente e
-corrigida do seu arquivo.
-
-Após o deploy estar `Live` novamente, por favor, **limpe o cache do seu navegador novamente** (usando `Ctrl + Shift + R`
-ou limpando manualmente) e teste a sua aplicação. Verifique se os avisos de IDs duplicados desapareceram e se o
-registo/login funciona corretamen

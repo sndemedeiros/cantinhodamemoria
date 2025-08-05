@@ -92,6 +92,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Função para redimensionar a imagem antes de enviar
+    function resizeImage(file, maxWidth, maxHeight, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Calcula as novas dimensões para redimensionar
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Converte o canvas para Base64 com qualidade especificada
+                    const resizedDataUrl = canvas.toDataURL(file.type, quality);
+                    resolve(resizedDataUrl);
+                };
+                img.onerror = (error) => {
+                    reject(error);
+                };
+            };
+            reader.onerror = (error) => {
+                reject(error);
+            };
+        });
+    }
+
     // Lógica para adicionar nova memória
     if (memoryForm) {
         memoryForm.addEventListener('submit', async (e) => {
@@ -120,16 +165,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('titulo', titulo);
             formData.append('data', data);
             formData.append('descricao', descricao);
+
             if (imagemFile) {
-                formData.append('imagem', imagemFile);
+                try {
+                    // Redimensiona a imagem antes de adicionar ao FormData
+                    // MaxWidth=800px, MaxHeight=800px, Qualidade=0.7 (70%)
+                    const resizedImageBase64 = await resizeImage(imagemFile, 800, 800, 0.7);
+                    // Converte a string Base64 de volta para um Blob para adicionar ao FormData
+                    const byteString = atob(resizedImageBase64.split(',')[1]);
+                    const mimeString = resizedImageBase64.split(',')[0].split(':')[1].split(';')[0];
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    const resizedBlob = new Blob([ab], { type: mimeString });
+
+                    formData.append('imagem', resizedBlob, imagemFile.name); // Usa o Blob redimensionado
+                } catch (error) {
+                    console.error('Erro ao redimensionar imagem:', error);
+                    showMessage('Erro ao processar a imagem. Tente uma imagem diferente.', true);
+                    return; // Impede o envio se o redimensionamento falhar
+                }
             }
 
             try {
-                // Para FormData, apiRequest precisa de um ajuste ou uma chamada fetch direta como antes
-                // Vamos usar fetch direto aqui para FormData, mas com tratamento de erro similar
+                // Usa fetch direto para FormData, com a URL completa do backend
                 const response = await fetch(`https://cantinho-da-memoria-backend.onrender.com/memorias`, {
                     method: 'POST',
-                    body: formData // FormData não precisa de 'Content-Type' no header, o browser adiciona
+                    body: formData // FormData não precisa de 'Content-Type' no header, o navegador adiciona
                 });
 
                 if (!response.ok) {

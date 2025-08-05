@@ -32,12 +32,12 @@
             <h2>Adicionar Nova Nota</h2>
             <form id="note-form">
                 <div class="form-group">
-                    <label for="title-input">Título:</label>
-                    <input type="text" id="title-input" required>
+                    <label for="note-title-input">Título:</label>
+                    <input type="text" id="note-title-input" required>
                 </div>
                 <div class="form-group">
-                    <label for="content-textarea">Conteúdo:</label>
-                    <textarea id="content-textarea" required></textarea>
+                    <label for="note-content-input">Conteúdo:</label>
+                    <textarea id="note-content-input" required></textarea>
                 </div>
                 <button type="submit">Adicionar Nota</button>
             </form>
@@ -46,22 +46,15 @@
         <section class="list-container">
             <h2>Lista de Notas</h2>
             <ul id="notes-list" class="item-list">
+                <!-- Notas serão carregadas aqui pelo JavaScript -->
             </ul>
         </section>
     </main>
 
-    <script src="notas.js"></script>
-    <script>
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-            document.getElementById('welcome-message').textContent = `Olá, ${userId}`;
-        }
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('user_id');
-            window.location.href = 'login.html';
-        });
-    </script>
+    <!-- Importa o api.js primeiro, pois notas.js depende dele -->
+    <script type="module" src="./api.js"></script>
+    <!-- Importa a lógica específica da página de notas -->
+    <script type="module" src="./notas.js"></script>
 </body>
 
 </html>

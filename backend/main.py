@@ -9,14 +9,14 @@ from fastapi import FastAPI, HTTPException, Form, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, firestore
 from google.cloud.firestore import Client
-import json # Adicione esta importação
+import json # Adicione esta importação para lidar com a variável de ambiente JSON
 
 # ==============================================================================
 # Configuração do Firebase
 # ==============================================================================
 # Tenta inicializar o app do Firebase se ainda não foi inicializado
 
-# Prioriza variável de ambiente para credenciais em produção
+# Prioriza variável de ambiente para credenciais em produção (essencial para Render)
 firebase_credentials_env = os.getenv("FIREBASE_CREDENTIALS_JSON")
 
 if firebase_credentials_env:
@@ -42,7 +42,7 @@ else:
             print("✅ Firebase inicializado com sucesso via arquivo local!")
             db = firestore.client()
         except Exception as e:
-            print(f"❌ Arquivo de credenciais não encontrado: {cred_path} e variável de ambiente não definida.")
+            print(f"❌ Erro ao inicializar o Firebase via arquivo local: {e}")
             db: Optional[Client] = None
     else:
         print(f"❌ Arquivo de credenciais não encontrado: {cred_path} e variável de ambiente não definida.")

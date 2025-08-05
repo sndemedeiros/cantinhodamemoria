@@ -1,136 +1,110 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // A URL base da nossa API do FastAPI
-    const API_URL = 'http://127.0.0.1:8000';
+// rotinas.js - Lógica específica para a página de rotinas
 
-    // Obter o ID do usuário do localStorage
-    const currentUserId = localStorage.getItem('user_id');
+// Importa as funções apiRequest e showMessage do arquivo api.js
+import { apiRequest, showMessage } from './api.js';
 
-    // Elementos HTML
-    const form = document.getElementById('routine-form');
-    const taskInput = document.getElementById('task-input');
-    const repetitionSelect = document.getElementById('repetition-select');
-    const timeInput = document.getElementById('time-input');
-    const routinesList = document.getElementById('routines-list');
-    const messageBox = document.getElementById('message-box');
+document.addEventListener('DOMContentLoaded', async () => {
+    const welcomeMessage = document.getElementById('welcome-message');
+    const logoutButton = document.getElementById('logout-btn');
+    const routineForm = document.getElementById('routine-form'); // ID do formulário de rotinas
+    const routinesList = document.getElementById('routines-list'); // ID da sua lista de rotinas
 
-    // Verificar se o usuário está logado, caso contrário, redireciona
-    if (!currentUserId) {
-        window.location.href = 'login.html';
-        return;
-    }
+    const userId = localStorage.getItem('user_id');
 
-    /**
-     * Exibe uma mensagem de feedback na tela.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {boolean} isError - Indica se é uma mensagem de erro.
-     */
-    function showMessage(message, isError = false) {
-        messageBox.textContent = message;
-        messageBox.className = isError ? 'message-box error' : 'message-box success';
-        messageBox.style.display = 'block';
+    // Redireciona se o usuário não estiver logado
+    if (!userId) {
+        showMessage('Você precisa estar logado para acessar esta página.', true);
+        // Pequeno atraso para a mensagem aparecer antes de redirecionar
         setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 5000); // Esconde a mensagem depois de 5 segundos
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        }, 1500);
+        return; // Interrompe a execução do script
     }
 
-    // Função para buscar e exibir as rotinas da API
-    async function fetchAndDisplayRoutines() {
-        try {
-            const response = await fetch(`${API_URL}/rotinas/${currentUserId}`);
-            const routines = await response.json();
+    // Atualiza a mensagem de boas-vindas
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Olá, ${userId}`;
+    }
 
-            routinesList.innerHTML = ''; // Limpa a lista antes de adicionar
+    // Lógica para Logout
+    if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user_id'); // Remove o user_id do localStorage
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        });
+    }
+
+    // Função para carregar e exibir rotinas
+    async function loadRoutines() {
+        if (!userId) return; // Garante que há um userId antes de tentar carregar
+
+        try {
+            // Exibe "Carregando rotinas..." enquanto a requisição é feita
+            routinesList.innerHTML = '<p>Carregando rotinas...</p>';
+
+            // Usa a função apiRequest importada
+            const routines = await apiRequest(`rotinas/${userId}`);
+            routinesList.innerHTML = ''; // Limpa a mensagem de carregamento
+
             if (routines.length === 0) {
-                routinesList.innerHTML = '<p>Nenhuma rotina cadastrada.</p>';
+                routinesList.innerHTML = '<p>Nenhuma rotina encontrada. Crie uma nova!</p>';
             } else {
                 routines.forEach(routine => {
-                    const routineCard = document.createElement('li');
-                    routineCard.className = 'routine-card';
-                    routineCard.innerHTML = `
-                        <div class="routine-info">
+                    const li = document.createElement('li');
+                    li.className = 'routine-card'; // Mantém a classe para o seu CSS
+                    li.innerHTML = `
+                        <div class="item-info">
                             <span class="task">${routine.tarefa}</span>
                             <span class="time">${routine.horario}</span>
                             <span class="repetition">(${routine.repeticao})</span>
                         </div>
-                        <button class="delete-btn" data-id="${routine.id}">❌</button>
+                        <button class="delete-btn" data-id="${routine.id}"><i class="fas fa-trash-alt"></i></button>
                     `;
-                    routinesList.appendChild(routineCard);
+                    routinesList.appendChild(li);
                 });
-                // Adicionar event listeners aos botões de deletar
+
+                // Adiciona event listeners para os botões de exclusão
                 document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', deleteRoutine);
+                    button.onclick = async (event) => {
+                        const routineId = event.currentTarget.dataset.id; // Usar currentTarget
+                        try {
+                            await apiRequest(`rotinas/${routineId}`, 'DELETE');
+                            showMessage('Rotina excluída com sucesso!', false);
+                            loadRoutines(); // Recarrega a lista
+                        } catch (error) {
+                            console.error('Erro ao excluir rotina:', error);
+                            showMessage('Erro ao excluir rotina.', true);
+                        }
+                    };
                 });
             }
         } catch (error) {
-            console.error('Erro ao buscar rotinas:', error);
+            console.error('Erro ao carregar rotinas:', error);
             showMessage('Erro ao carregar rotinas.', true);
         }
     }
 
-    // Função para adicionar uma nova rotina
-    async function createRoutine(event) {
-        event.preventDefault();
+    // Lógica para adicionar nova rotina
+    if (routineForm) {
+        routineForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tarefa = document.getElementById('task-input').value;
+            const repeticao = document.getElementById('repetition-select').value;
+            const horario = document.getElementById('time-input').value;
 
-        const tarefa = taskInput.value;
-        const repeticao = repetitionSelect.value;
-        const horario = timeInput.value;
-
-        const routineData = {
-            user_id: currentUserId,
-            tarefa: tarefa,
-            repeticao: repeticao,
-            horario: horario
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/rotinas`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(routineData)
-            });
-
-            if (response.ok) {
-                showMessage('Rotina adicionada com sucesso!');
-                form.reset();
-                fetchAndDisplayRoutines();
-            } else {
+            try {
+                await apiRequest('rotinas', 'POST', { user_id: userId, tarefa, repeticao, horario });
+                showMessage('Rotina adicionada com sucesso!', false);
+                routineForm.reset();
+                loadRoutines(); // Recarrega a lista de rotinas
+            } catch (error) {
+                console.error('Erro ao adicionar rotina:', error);
                 showMessage('Erro ao adicionar rotina.', true);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar rotina:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
+        });
     }
 
-    // Função para deletar uma rotina
-    async function deleteRoutine(event) {
-        const routineId = event.target.dataset.id;
-        try {
-            const response = await fetch(`${API_URL}/rotinas/${routineId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                showMessage('Rotina excluída com sucesso!');
-                fetchAndDisplayRoutines();
-            } else {
-                showMessage('Erro ao excluir rotina.', true);
-            }
-        } catch (error) {
-            console.error('Erro ao excluir rotina:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
-    }
-
-    // Event Listeners
-    if (form) {
-        form.addEventListener('submit', createRoutine);
-    }
-
-    // Inicializar a lista de rotinas quando a página carrega
-    window.addEventListener('load', () => {
-        fetchAndDisplayRoutines();
-    });
+    // Carrega as rotinas ao carregar a página (após todas as definições)
+    loadRoutines();
 });

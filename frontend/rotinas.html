@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -55,22 +54,15 @@
         <section class="list-container">
             <h2>Lista de Rotinas</h2>
             <ul id="routines-list" class="item-list">
+                <!-- Rotinas serão carregadas aqui pelo JavaScript -->
             </ul>
         </section>
     </main>
 
-    <script src="rotinas.js"></script>
-    <script>
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-            document.getElementById('welcome-message').textContent = `Olá, ${userId}`;
-        }
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('user_id');
-            window.location.href = 'login.html';
-        });
-    </script>
+    <!-- Importa o api.js primeiro, pois rotinas.js depende dele -->
+    <script type="module" src="./api.js"></script>
+    <!-- Importa a lógica específica da página de rotinas -->
+    <script type="module" src="./rotinas.js"></script>
 </body>
 
 </html>

@@ -1,159 +1,152 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // A URL base da nossa API do FastAPI
-    const API_URL = 'http://127.0.0.1:8000';
+// memorias.js - Lógica específica para a página de memórias
 
-    // Obter o ID do usuário do localStorage
-    const currentUserId = localStorage.getItem('user_id');
+// Importa as funções apiRequest e showMessage do arquivo api.js
+import { apiRequest, showMessage } from './api.js';
 
-    // Elementos HTML
-    const form = document.getElementById('memory-form');
-    const titleInput = document.getElementById('title-input');
-    const dateInput = document.getElementById('date-input');
-    const descriptionInput = document.getElementById('description-input');
-    const imageInput = document.getElementById('image-input');
-    const memoriesList = document.getElementById('memories-list');
-    const messageBox = document.getElementById('message-box');
+document.addEventListener('DOMContentLoaded', async () => {
+    const welcomeMessage = document.getElementById('welcome-message');
+    const logoutButton = document.getElementById('logout-btn');
+    const memoryForm = document.getElementById('memory-form'); // ID do formulário de memórias
+    const memoriesList = document.getElementById('memories-list'); // ID da sua lista de memórias
 
-    // Verificar se o usuário está logado, caso contrário redireciona
-    if (!currentUserId) {
-        window.location.href = 'login.html';
-        return;
-    }
+    const userId = localStorage.getItem('user_id');
 
-    /**
-     * Exibe uma mensagem de feedback na tela.
-     * @param {string} message - A mensagem a ser exibida.
-     * @param {boolean} isError - Indica se é uma mensagem de erro.
-     */
-    function showMessage(message, isError = false) {
-        messageBox.textContent = message;
-        messageBox.className = isError ? 'message-box error' : 'message-box success';
-        messageBox.style.display = 'block';
+    // Redireciona se o usuário não estiver logado
+    if (!userId) {
+        showMessage('Você precisa estar logado para acessar esta página.', true);
+        // Pequeno atraso para a mensagem aparecer antes de redirecionar
         setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 5000); // Esconde a mensagem depois de 5 segundos
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        }, 1500);
+        return; // Interrompe a execução do script
     }
 
-    // Função para buscar e exibir as memórias da API
-    async function fetchAndDisplayMemories() {
-        try {
-            const response = await fetch(`${API_URL}/memorias/${currentUserId}`);
-            const memories = await response.json();
+    // Atualiza a mensagem de boas-vindas
+    if (welcomeMessage) {
+        welcomeMessage.textContent = `Olá, ${userId}`;
+    }
 
-            memoriesList.innerHTML = ''; // Limpa a lista antes de adicionar
+    // Lógica para Logout
+    if (logoutButton) {
+        logoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user_id'); // Remove o user_id do localStorage
+            window.location.href = 'index.html'; // Redireciona para a página de login
+        });
+    }
+
+    // Função para carregar e exibir memórias
+    async function loadMemories() {
+        if (!userId) return; // Garante que há um userId antes de tentar carregar
+
+        try {
+            // Exibe "Carregando memórias..." enquanto a requisição é feita
+            memoriesList.innerHTML = '<p>Carregando memórias...</p>';
+
+            // Usa a função apiRequest importada
+            const memories = await apiRequest(`memorias/${userId}`);
+            memoriesList.innerHTML = ''; // Limpa a mensagem de carregamento
+
             if (memories.length === 0) {
-                memoriesList.innerHTML = '<p>Nenhuma memória cadastrada.</p>';
+                memoriesList.innerHTML = '<p>Nenhuma memória encontrada. Crie uma nova!</p>';
             } else {
                 memories.forEach(memory => {
-                    const memoryCard = document.createElement('li');
-                    memoryCard.className = 'memory-card';
+                    const li = document.createElement('li');
+                    li.className = 'memory-card'; // Mantém a classe para o seu CSS
 
-                    // --- CORREÇÃO: Verificando se a URL é Base64 ou um caminho de arquivo ---
+                    // Decide se a imagem é Base64 ou um URL (assumindo que o backend retorna Base64 ou um caminho relativo)
                     const imageUrl = memory.imagem_url
-                        ? (memory.imagem_url.startsWith('data:') ? memory.imagem_url : `${API_URL}/${memory.imagem_url}`)
-                        : null;
+                        ? (memory.imagem_url.startsWith('data:') ? memory.imagem_url : `https://cantinho-da-memoria-backend.onrender.com/${memory.imagem_url}`)
+                        : 'https://placehold.co/100x100?text=Sem+Imagem'; // Placeholder se não houver imagem
 
-                    memoryCard.innerHTML = `
-                        <div class="memory-info">
+                    li.innerHTML = `
+                        <div class="item-info">
                             <h3 class="title">${memory.titulo}</h3>
                             <p class="date">${memory.data}</p>
                             <p>${memory.descricao}</p>
-                            <!-- Adiciona a imagem se o URL for válido. O onerror exibe um placeholder se o URL estiver quebrado. -->
-                            ${imageUrl ? `<img src="${imageUrl}" alt="Imagem da memória" class="memory-image" onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=Sem+Imagem';">` : `<img src="https://placehold.co/100x100?text=Sem+Imagem" alt="Sem imagem" class="memory-image">`}
+                            <img src="${imageUrl}" alt="Imagem da memória" class="memory-image" onerror="this.onerror=null; this.src='https://placehold.co/100x100?text=Erro+Imagem';">
                         </div>
-                        <button class="delete-btn" data-id="${memory.id}">❌</button>
+                        <button class="delete-btn" data-id="${memory.id}"><i class="fas fa-trash-alt"></i></button>
                     `;
-                    memoriesList.appendChild(memoryCard);
+                    memoriesList.appendChild(li);
                 });
-                // Adicionar event listeners aos botões de deletar
+
+                // Adiciona event listeners para os botões de exclusão
                 document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', deleteMemory);
+                    button.onclick = async (event) => {
+                        const memoryId = event.currentTarget.dataset.id; // Usar currentTarget
+                        try {
+                            await apiRequest(`memorias/${memoryId}`, 'DELETE');
+                            showMessage('Memória excluída com sucesso!', false);
+                            loadMemories(); // Recarrega a lista
+                        } catch (error) {
+                            console.error('Erro ao excluir memória:', error);
+                            showMessage('Erro ao excluir memória.', true);
+                        }
+                    };
                 });
             }
         } catch (error) {
-            console.error('Erro ao buscar memórias:', error);
+            console.error('Erro ao carregar memórias:', error);
             showMessage('Erro ao carregar memórias.', true);
         }
     }
 
-    // Função para adicionar uma nova memória
-    async function createMemory(event) {
-        event.preventDefault();
+    // Lógica para adicionar nova memória
+    if (memoryForm) {
+        memoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        // Verificação do limite de memórias antes de adicionar
-        try {
-            const response = await fetch(`${API_URL}/memorias/${currentUserId}`);
-            const memories = await response.json();
-            if (memories.length >= 5) {
-                showMessage('Limite de 5 memórias atingido. Não é possível adicionar mais fotos.', true);
-                return; // Impede a continuação da função
+            // Verificação do limite de memórias antes de adicionar
+            try {
+                const existingMemories = await apiRequest(`memorias/${userId}`);
+                if (existingMemories.length >= 5) {
+                    showMessage('Limite de 5 memórias atingido. Não é possível adicionar mais fotos.', true);
+                    return; // Impede a continuação da função
+                }
+            } catch (error) {
+                console.error('Erro ao verificar o limite de memórias:', error);
+                showMessage('Erro ao verificar o limite de memórias.', true);
+                return; // Impede a continuação da função em caso de erro
             }
-        } catch (error) {
-            console.error('Erro ao verificar o limite de memórias:', error);
-            showMessage('Erro ao verificar o limite de memórias.', true);
-            return; // Impede a continuação da função em caso de erro
-        }
 
-        const titulo = titleInput.value;
-        const data = dateInput.value;
-        const descricao = descriptionInput.value;
-        const imagemFile = imageInput.files[0];
+            const titulo = document.getElementById('title-input').value;
+            const data = document.getElementById('date-input').value;
+            const descricao = document.getElementById('description-input').value;
+            const imagemFile = document.getElementById('image-input').files[0];
 
-        const formData = new FormData();
-        formData.append('user_id', currentUserId);
-        formData.append('titulo', titulo);
-        formData.append('data', data);
-        formData.append('descricao', descricao);
-        if (imagemFile) {
-            formData.append('imagem', imagemFile);
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/memorias`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                showMessage('Memória adicionada com sucesso!');
-                form.reset();
-                fetchAndDisplayMemories();
-            } else {
-                showMessage('Erro ao adicionar memória.', true);
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('titulo', titulo);
+            formData.append('data', data);
+            formData.append('descricao', descricao);
+            if (imagemFile) {
+                formData.append('imagem', imagemFile);
             }
-        } catch (error) {
-            console.error('Erro ao adicionar memória:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
+
+            try {
+                // Para FormData, apiRequest precisa de um ajuste ou uma chamada fetch direta como antes
+                // Vamos usar fetch direto aqui para FormData, mas com tratamento de erro similar
+                const response = await fetch(`https://cantinho-da-memoria-backend.onrender.com/memorias`, {
+                    method: 'POST',
+                    body: formData // FormData não precisa de 'Content-Type' no header, o browser adiciona
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Erro ao adicionar memória.');
+                }
+
+                showMessage('Memória adicionada com sucesso!', false);
+                memoryForm.reset();
+                loadMemories(); // Recarrega a lista de memórias
+            } catch (error) {
+                console.error('Erro ao adicionar memória:', error);
+                showMessage(`Erro ao adicionar memória: ${error.message}.`, true);
+            }
+        });
     }
 
-    // Função para deletar uma memória
-    async function deleteMemory(event) {
-        const memoryId = event.target.dataset.id;
-        try {
-            const response = await fetch(`${API_URL}/memorias/${memoryId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                showMessage('Memória excluída com sucesso!');
-                fetchAndDisplayMemories();
-            } else {
-                showMessage('Erro ao excluir memória.', true);
-            }
-        } catch (error) {
-            console.error('Erro ao excluir memória:', error);
-            showMessage('Erro ao conectar com a API.', true);
-        }
-    }
-
-    // Event Listeners
-    if (form) {
-        form.addEventListener('submit', createMemory);
-    }
-
-    // Inicializar a lista de memórias quando a página carrega
-    window.addEventListener('load', () => {
-        fetchAndDisplayMemories();
-    });
+    // Carrega as memórias ao carregar a página (após todas as definições)
+    loadMemories();
 });

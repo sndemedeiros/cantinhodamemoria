@@ -54,22 +54,15 @@
         <section class="list-container">
             <h2>Lista de Memórias</h2>
             <ul id="memories-list" class="item-list">
+                <!-- Memórias serão carregadas aqui pelo JavaScript -->
             </ul>
         </section>
     </main>
 
-    <script src="memorias.js"></script>
-    <script>
-        const userId = localStorage.getItem('user_id');
-        if (userId) {
-            document.getElementById('welcome-message').textContent = `Olá, ${userId}`;
-        }
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('user_id');
-            window.location.href = 'login.html';
-        });
-    </script>
+    <!-- Importa o api.js primeiro, pois memorias.js depende dele -->
+    <script type="module" src="./api.js"></script>
+    <!-- Importa a lógica específica da página de memórias -->
+    <script type="module" src="./memorias.js"></script>
 </body>
 
 </html>
